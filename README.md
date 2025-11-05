@@ -28,12 +28,72 @@ This MCP server is built with a clean 4-layer architecture (bottom-up):
 
 ## Features
 
+### Core Features
+
 - ✅ **Execute bash commands** on remote SSH servers
 - ✅ **File transfer operations** (upload/download) with SFTP
 - ✅ **Connection management** with automatic cleanup
 - ✅ **Security features** - Risk acceptance, validation, timeouts
 - ✅ **Stdio mode** - Native Claude Desktop integration
 - ✅ **CLI tool** - Installable as `uv run mcp-remote-exec`
+
+### Plugin System
+
+- ✅ **Extensible architecture** - Add domain-specific functionality
+- ✅ **Conditional activation** - Enable plugins via environment variables
+- ✅ **Proxmox plugin** - Container management for Proxmox VE (LXC containers)
+
+## Plugins
+
+### Proxmox Plugin
+
+The Proxmox plugin provides container management tools for Proxmox VE. It enables AI assistants to manage LXC containers through specialized commands.
+
+**Activation**: Set `ENABLE_PROXMOX=true` in your `.env` file
+
+**Requirements**: Your SSH host must be a Proxmox VE server
+
+**Available Tools** (7 tools):
+
+- `proxmox_container_exec_command` - Execute commands inside containers
+- `proxmox_list_containers` - List all LXC containers
+- `proxmox_container_status` - Get container status (running/stopped)
+- `proxmox_start_container` - Start a stopped container
+- `proxmox_stop_container` - Stop a running container
+- `proxmox_download_file_from_container` - Download files from containers
+- `proxmox_upload_file_to_container` - Upload files to containers
+
+**Tool Separation**:
+
+- **Core tools** handle Proxmox host operations (use `ssh_exec_command`, `ssh_upload_file`, etc.)
+- **Plugin tools** handle container-specific operations (use `proxmox_*` tools)
+
+**Example Configuration**:
+
+```bash
+# .env
+I_ACCEPT_RISKS=true
+HOST=192.168.1.100    # Your Proxmox host
+SSH_USERNAME=root
+SSH_PASSWORD=secret
+ENABLE_PROXMOX=true   # Activate plugin
+```
+
+**Example Usage**:
+
+```python
+# Host operations (use core tools)
+ssh_exec_command("pvecm status")                   # Check cluster status
+ssh_exec_command("df -h")                          # Check host disk space
+ssh_download_file("/etc/pve/storage.cfg", "./storage.cfg")
+
+# Container operations (use plugin tools)
+proxmox_list_containers()                          # List all containers
+proxmox_container_exec_command(ctid=100, command="apt update")  # Update container
+proxmox_upload_file_to_container(ctid=100, local_path="./app.conf", container_path="/etc/app/app.conf")
+```
+
+For detailed documentation, see [plugins/proxmox/README.md](src/mcp_remote_exec/plugins/proxmox/README.md)
 
 ## Installation
 

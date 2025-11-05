@@ -66,7 +66,22 @@ def _initialize_services() -> ServiceContainer:
         output_formatter=output_formatter,
     )
 
+    # Initialize and register plugins
+    from mcp_remote_exec.plugins.registry import PluginRegistry
+
+    plugin_registry = PluginRegistry()
+    activated_plugins = plugin_registry.discover_and_register(mcp, _app_context)
+
+    # Store activated plugins in context for later reference
+    _app_context.plugin_services["_activated_plugins"] = activated_plugins
+
     _log.info("SSH MCP Remote Exec ready!")
+
+    if activated_plugins:
+        _log.info(f"Activated plugins: {', '.join(activated_plugins)}")
+    else:
+        _log.info("No plugins activated")
+
     return _app_context
 
 

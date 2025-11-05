@@ -5,7 +5,7 @@ Pydantic models for input validation and type checking in FastMCP tools.
 """
 
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class ResponseFormat(str, Enum):
@@ -72,6 +72,22 @@ class SSHUploadFileInput(BaseModel):
         ge=0,
         le=777,
     )
+
+    @field_validator("permissions")
+    @classmethod
+    def validate_octal_permissions(cls, v: int | None) -> int | None:
+        """Validate that permissions value contains only octal digits (0-7)"""
+        if v is None:
+            return v
+
+        # Check each digit is valid octal (0-7)
+        for digit in str(v):
+            if int(digit) > 7:
+                raise ValueError(
+                    f"Invalid octal permission value: {v}. "
+                    "Each digit must be 0-7. Examples: 644, 755, 600, 700"
+                )
+        return v
 
 
 class SSHDownloadFileInput(BaseModel):

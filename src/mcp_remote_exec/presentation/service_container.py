@@ -4,7 +4,8 @@ Service Container for SSH MCP Remote Exec
 Provides type-safe service dependency management.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
@@ -24,3 +25,4 @@ class ServiceContainer:
     command_service: CommandService
     file_service: FileTransferService
     output_formatter: OutputFormatter
+    plugin_services: dict[str, Any] = field(default_factory=dict)

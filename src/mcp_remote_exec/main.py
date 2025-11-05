@@ -27,6 +27,12 @@ logging.basicConfig(level=logging.INFO)
 def run_stdio_mode() -> None:
     """Run MCP server"""
     try:
+        # Eagerly initialize services to log activated plugins
+        from mcp_remote_exec.presentation.mcp_tools import get_services
+
+        get_services()
+
+        # Start MCP server
         mcp.run()
     except KeyboardInterrupt:
         pass
