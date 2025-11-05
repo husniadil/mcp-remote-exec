@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mcp-remote-exec": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/husni/github.com/husniadil/mcp-remote-exec",
+        "run",
+        "mcp-remote-exec"
+      ]
+    }
+  }
+}
