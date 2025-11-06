@@ -42,8 +42,83 @@ This MCP server is built with a clean 4-layer architecture (bottom-up):
 - ✅ **Extensible architecture** - Add domain-specific functionality
 - ✅ **Conditional activation** - Enable plugins via environment variables
 - ✅ **Proxmox plugin** - Container management for Proxmox VE (LXC containers)
+- ✅ **ImageKit plugin** - Two-phase file transfers for HTTP gateway scenarios
 
 ## Plugins
+
+### ImageKit Plugin
+
+The ImageKit plugin enables file transfers when the MCP server runs behind an HTTP gateway, where direct SFTP connections don't work. It uses ImageKit as a temporary storage bridge for two-phase transfers.
+
+**Activation**: Set ImageKit credentials and `ENABLE_IMAGEKIT=true` in your `.env` file
+
+**Requirements**: ImageKit account (free tier available at https://imagekit.io)
+
+**When to use**:
+
+- MCP server runs through HTTP gateway (not direct connection)
+- Direct SFTP between client and server isn't possible
+- Need secure file transfers with short-lived tokens
+
+**Available Tools** (4 tools):
+
+- `imagekit_request_upload` - Initiate upload (step 1/3)
+- `imagekit_confirm_upload` - Complete upload (step 3/3)
+- `imagekit_request_download` - Initiate download (step 1/3)
+- `imagekit_confirm_download` - Complete download (step 3/3)
+
+**How it works**:
+
+Upload: Client → ImageKit → Server  
+Download: Server → ImageKit → Client
+
+**Example Configuration**:
+
+```bash
+# .env
+I_ACCEPT_RISKS=true
+HOST=192.168.1.100
+SSH_USERNAME=root
+SSH_PASSWORD=secret
+
+# ImageKit credentials
+IMAGEKIT_PUBLIC_KEY=your_public_key
+IMAGEKIT_PRIVATE_KEY=your_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_id
+IMAGEKIT_FOLDER=/mcp-remote-exec  # Optional: organize files in a folder
+ENABLE_IMAGEKIT=true
+```
+
+**Example Usage**:
+
+```python
+# Upload file to server
+imagekit_request_upload(remote_path="/data/file.txt", permissions=644)
+# Returns curl command - execute it to upload file
+# Then confirm:
+imagekit_confirm_upload(transfer_id="abc-123-def")
+
+# Download file from server
+imagekit_request_download(remote_path="/data/file.txt")
+# Returns download URL - execute curl to download
+# Then confirm cleanup:
+imagekit_confirm_download(transfer_id="abc-123-def")
+```
+
+**Tool Replacement**:
+
+When ImageKit plugin is enabled (`ENABLE_IMAGEKIT=true` with valid credentials):
+
+- ❌ `ssh_upload_file` - NOT registered (use `imagekit_request_upload` + `imagekit_confirm_upload`)
+- ❌ `ssh_download_file` - NOT registered (use `imagekit_request_download` + `imagekit_confirm_download`)
+- ❌ `proxmox_upload_file_to_container` - NOT registered (ImageKit provides unified file transfer)
+- ❌ `proxmox_download_file_from_container` - NOT registered (ImageKit provides unified file transfer)
+- ✅ `ssh_exec_command` - Still available
+- ✅ All Proxmox container management tools (`proxmox_container_exec_command`, etc.) - Still available
+
+**Note**: ImageKit tools support Proxmox containers via the `ctid` parameter, providing a unified interface for all file transfers.
+
+For detailed documentation, see [plugins/imagekit/README.md](src/mcp_remote_exec/plugins/imagekit/README.md)
 
 ### Proxmox Plugin
 
@@ -53,13 +128,18 @@ The Proxmox plugin provides container management tools for Proxmox VE. It enable
 
 **Requirements**: Your SSH host must be a Proxmox VE server
 
-**Available Tools** (7 tools):
+**Available Tools**:
+
+Container management (always available - 5 tools):
 
 - `proxmox_container_exec_command` - Execute commands inside containers
 - `proxmox_list_containers` - List all LXC containers
 - `proxmox_container_status` - Get container status (running/stopped)
 - `proxmox_start_container` - Start a stopped container
 - `proxmox_stop_container` - Stop a running container
+
+File transfer (conditional - 2 tools, disabled if ImageKit is enabled):
+
 - `proxmox_download_file_from_container` - Download files from containers
 - `proxmox_upload_file_to_container` - Upload files to containers
 
@@ -67,6 +147,8 @@ The Proxmox plugin provides container management tools for Proxmox VE. It enable
 
 - **Core tools** handle Proxmox host operations (use `ssh_exec_command`, `ssh_upload_file`, etc.)
 - **Plugin tools** handle container-specific operations (use `proxmox_*` tools)
+
+**Note**: If ImageKit plugin is enabled, Proxmox file transfer tools are replaced by ImageKit tools which support the `ctid` parameter for container operations
 
 **Example Configuration**:
 

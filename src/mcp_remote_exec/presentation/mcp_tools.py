@@ -75,6 +75,20 @@ def _initialize_services() -> ServiceContainer:
     # Store activated plugins in context for later reference
     _app_context.plugin_services["_activated_plugins"] = activated_plugins
 
+    # Register SSH file transfer tools conditionally
+    # If ImageKit plugin is enabled, skip SSH file transfer tools
+    imagekit_enabled = "imagekit" in _app_context.enabled_plugins
+    if imagekit_enabled:
+        _log.warning(
+            "SSH file transfer tools (ssh_upload_file, ssh_download_file) NOT registered - "
+            "ImageKit plugin provides alternative file transfer interface"
+        )
+    else:
+        _log.info(
+            "Registering SSH file transfer tools (ssh_upload_file, ssh_download_file)"
+        )
+        _register_ssh_file_transfer_tools()
+
     _log.info("SSH MCP Remote Exec ready!")
 
     if activated_plugins:
@@ -154,111 +168,113 @@ async def ssh_exec_command(
         return f"[ERROR] Unexpected error: {str(e)}"
 
 
-@mcp.tool(name="ssh_upload_file")
-async def ssh_upload_file(
-    local_path: Annotated[
-        str, "Local file path to upload - absolute or relative (required)"
-    ] = "",
-    remote_path: Annotated[
-        str, "Remote destination path on your SSH server (required)"
-    ] = "",
-    permissions: Annotated[
-        int | None,
-        "File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional.",
-    ] = None,
-    overwrite: Annotated[
-        bool, "Overwrite existing remote files (default: False)"
-    ] = False,
-) -> str:
-    """Upload a file to your remote SSH server via SFTP.
+def _register_ssh_file_transfer_tools() -> None:
+    """Register SSH file transfer tools (upload/download)"""
 
-    Use this tool to transfer files to your configured server for:
-    - Deploying configuration files (nginx.conf, app.conf)
-    - Uploading scripts (install.sh, backup.sh)
-    - Transferring data files (backups, logs)
-    - Installing software packages
+    @mcp.tool(name="ssh_upload_file")
+    async def ssh_upload_file(
+        local_path: Annotated[
+            str, "Local file path to upload - absolute or relative (required)"
+        ] = "",
+        remote_path: Annotated[
+            str, "Remote destination path on your SSH server (required)"
+        ] = "",
+        permissions: Annotated[
+            int | None,
+            "File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional.",
+        ] = None,
+        overwrite: Annotated[
+            bool, "Overwrite existing remote files (default: False)"
+        ] = False,
+    ) -> str:
+        """Upload a file to your remote SSH server via SFTP.
 
-    Args:
-        local_path: Local file path to upload - absolute or relative (required)
-        remote_path: Remote destination path on your SSH server (required)
-        permissions: File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional, defaults to server's umask.
-        overwrite: Overwrite existing files (default: False, will fail if file exists)
+        Use this tool to transfer files to your configured server for:
+        - Deploying configuration files (nginx.conf, app.conf)
+        - Uploading scripts (install.sh, backup.sh)
+        - Transferring data files (backups, logs)
+        - Installing software packages
 
-    Returns:
-        Transfer result with metadata (bytes transferred, speed, etc.)
-    """
-    try:
-        # Validate input
-        input_data = SSHUploadFileInput(
-            local_path=local_path,
-            remote_path=remote_path,
-            permissions=permissions,
-            overwrite=overwrite,
-        )
+        Args:
+            local_path: Local file path to upload - absolute or relative (required)
+            remote_path: Remote destination path on your SSH server (required)
+            permissions: File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional, defaults to server's umask.
+            overwrite: Overwrite existing files (default: False, will fail if file exists)
 
-        services = get_services()
+        Returns:
+            Transfer result with metadata (bytes transferred, speed, etc.)
+        """
+        try:
+            # Validate input
+            input_data = SSHUploadFileInput(
+                local_path=local_path,
+                remote_path=remote_path,
+                permissions=permissions,
+                overwrite=overwrite,
+            )
 
-        result = services.file_service.upload_file(
-            local_path=input_data.local_path,
-            remote_path=input_data.remote_path,
-            permissions=input_data.permissions,
-            overwrite=input_data.overwrite,
-        )
+            services = get_services()
 
-        return result
+            result = services.file_service.upload_file(
+                local_path=input_data.local_path,
+                remote_path=input_data.remote_path,
+                permissions=input_data.permissions,
+                overwrite=input_data.overwrite,
+            )
 
-    except ValueError as e:
-        return f"[ERROR] Input validation error: {str(e)}"
-    except Exception as e:
-        return f"[ERROR] Unexpected error: {str(e)}"
+            return result
 
+        except ValueError as e:
+            return f"[ERROR] Input validation error: {str(e)}"
+        except Exception as e:
+            return f"[ERROR] Unexpected error: {str(e)}"
 
-@mcp.tool(name="ssh_download_file")
-async def ssh_download_file(
-    remote_path: Annotated[
-        str, "Remote file path on your SSH server to download (required)"
-    ] = "",
-    local_path: Annotated[
-        str, "Local destination file path - absolute or relative (required)"
-    ] = "",
-    overwrite: Annotated[
-        bool,
-        "Overwrite existing local files (default: False, will fail if file exists)",
-    ] = False,
-) -> str:
-    """Download a file from your remote SSH server via SFTP.
+    @mcp.tool(name="ssh_download_file")
+    async def ssh_download_file(
+        remote_path: Annotated[
+            str, "Remote file path on your SSH server to download (required)"
+        ] = "",
+        local_path: Annotated[
+            str, "Local destination file path - absolute or relative (required)"
+        ] = "",
+        overwrite: Annotated[
+            bool,
+            "Overwrite existing local files (default: False, will fail if file exists)",
+        ] = False,
+    ) -> str:
+        """Download a file from your remote SSH server via SFTP.
 
-    Use this tool to transfer files from your configured server:
-    - Download log files (/var/log/app.log, /var/log/nginx/access.log)
-    - Retrieving configuration files (/etc/nginx/nginx.conf, /etc/hosts)
-    - Getting data files (database exports, backups)
-    - Collecting system information (/proc/cpuinfo)
+        Use this tool to transfer files from your configured server:
+        - Download log files (/var/log/app.log, /var/log/nginx/access.log)
+        - Retrieving configuration files (/etc/nginx/nginx.conf, /etc/hosts)
+        - Getting data files (database exports, backups)
+        - Collecting system information (/proc/cpuinfo)
 
-    Args:
-        remote_path: Remote file path on your SSH server to download (required)
-        local_path: Local destination path - absolute or relative (required)
-        overwrite: Overwrite existing local files (default: False, will fail if file exists)
+        Args:
+            remote_path: Remote file path on your SSH server to download (required)
+            local_path: Local destination path - absolute or relative (required)
+            overwrite: Overwrite existing local files (default: False, will fail if file exists)
 
-    Returns:
-        Transfer result with metadata (bytes transferred, speed, etc.)
-    """
-    try:
-        # Validate input
-        input_data = SSHDownloadFileInput(
-            remote_path=remote_path, local_path=local_path, overwrite=overwrite
-        )
+        Returns:
+            Transfer result with metadata (bytes transferred, speed, etc.)
+        """
+        try:
+            # Validate input
+            input_data = SSHDownloadFileInput(
+                remote_path=remote_path, local_path=local_path, overwrite=overwrite
+            )
 
-        services = get_services()
+            services = get_services()
 
-        result = services.file_service.download_file(
-            remote_path=input_data.remote_path,
-            local_path=input_data.local_path,
-            overwrite=input_data.overwrite,
-        )
+            result = services.file_service.download_file(
+                remote_path=input_data.remote_path,
+                local_path=input_data.local_path,
+                overwrite=input_data.overwrite,
+            )
 
-        return result
+            return result
 
-    except ValueError as e:
-        return f"[ERROR] Input validation error: {str(e)}"
-    except Exception as e:
-        return f"[ERROR] Unexpected error: {str(e)}"
+        except ValueError as e:
+            return f"[ERROR] Input validation error: {str(e)}"
+        except Exception as e:
+            return f"[ERROR] Unexpected error: {str(e)}"

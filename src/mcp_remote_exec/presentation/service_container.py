@@ -26,3 +26,4 @@ class ServiceContainer:
     file_service: FileTransferService
     output_formatter: OutputFormatter
     plugin_services: dict[str, Any] = field(default_factory=dict)
+    enabled_plugins: set[str] = field(default_factory=set)

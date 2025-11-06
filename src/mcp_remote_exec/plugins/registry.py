@@ -35,6 +35,14 @@ class PluginRegistry:
         except ImportError:
             _log.debug("Proxmox plugin not available")
 
+        try:
+            from mcp_remote_exec.plugins.imagekit import ImageKitPlugin
+
+            self.plugins.append(ImageKitPlugin())
+            _log.debug("Discovered ImageKit plugin")
+        except ImportError:
+            _log.debug("ImageKit plugin not available")
+
     def register_all(self, mcp: FastMCP, container: ServiceContainer) -> list[str]:
         """
         Register all enabled plugins with the MCP server.
@@ -46,11 +54,22 @@ class PluginRegistry:
         Returns:
             List of activated plugin names
         """
+        # Pre-scan: Determine which plugins will be enabled
+        # This allows plugins to coordinate during registration
+        for plugin in self.plugins:
+            if plugin.is_enabled(container):
+                container.enabled_plugins.add(plugin.name)
+                _log.debug(f"Plugin {plugin.name} will be enabled")
+
+        # Check for plugin coordination needs
+        self._check_plugin_coordination(container)
+
         activated = []
 
+        # Now register the enabled plugins
         for plugin in self.plugins:
             try:
-                if plugin.is_enabled(container):
+                if plugin.name in container.enabled_plugins:
                     _log.info(f"Activating plugin: {plugin.name}")
                     plugin.register_tools(mcp, container)
                     activated.append(plugin.name)
@@ -58,8 +77,26 @@ class PluginRegistry:
                     _log.debug(f"Plugin {plugin.name} is disabled")
             except Exception as e:
                 _log.error(f"Failed to register plugin {plugin.name}: {e}")
+                # Remove from enabled set if registration failed
+                container.enabled_plugins.discard(plugin.name)
 
         return activated
+
+    def _check_plugin_coordination(self, container: ServiceContainer) -> None:
+        """
+        Check for plugin coordination and potential conflicts.
+
+        Logs warnings about tool replacements and conflicts.
+        """
+        # Check if both Proxmox and ImageKit are enabled
+        proxmox_enabled = "proxmox" in container.enabled_plugins
+        imagekit_enabled = "imagekit" in container.enabled_plugins
+
+        if proxmox_enabled and imagekit_enabled:
+            _log.warning(
+                "Both Proxmox and ImageKit plugins are enabled. "
+                "Proxmox file transfer tools will be disabled in favor of ImageKit."
+            )
 
     def discover_and_register(
         self, mcp: FastMCP, container: ServiceContainer

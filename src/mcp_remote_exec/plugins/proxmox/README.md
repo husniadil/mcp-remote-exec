@@ -20,7 +20,7 @@ The plugin follows the same 4-layer architecture as the core:
 plugins/proxmox/
 ├── __init__.py       # Plugin registration and activation
 ├── models.py         # Pydantic input models for validation
-├── services.py       # ProxmoxService (business logic)
+├── service.py        # ProxmoxService (business logic)
 └── tools.py          # MCP tool definitions
 ```
 

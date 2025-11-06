@@ -9,7 +9,7 @@ from typing import Annotated
 
 from fastmcp import FastMCP
 from mcp_remote_exec.presentation.service_container import ServiceContainer
-from mcp_remote_exec.plugins.proxmox.services import ProxmoxService
+from mcp_remote_exec.plugins.proxmox.service import ProxmoxService
 from mcp_remote_exec.plugins.proxmox.models import (
     ProxmoxContainerExecInput,
     ProxmoxListContainersInput,
@@ -31,11 +31,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
         mcp: FastMCP server instance
         container: Service container with core services
     """
-    # Create Proxmox service
-    proxmox_service = ProxmoxService(
-        command_service=container.command_service,
-        file_service=container.file_service,
-    )
+    # Get Proxmox service from plugin services
+    proxmox_service_obj = container.plugin_services.get("proxmox")
+    if not proxmox_service_obj or not isinstance(proxmox_service_obj, ProxmoxService):
+        _log.error("Proxmox service not found in plugin services")
+        return
+
+    proxmox_service: ProxmoxService = proxmox_service_obj
 
     @mcp.tool(name="proxmox_container_exec_command")
     async def proxmox_container_exec_command(
@@ -215,6 +217,28 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
         except Exception as e:
             return f"[ERROR] Unexpected error: {str(e)}"
 
+    _log.info("Registered 5 Proxmox container management tools")
+
+
+def register_proxmox_file_tools(mcp: FastMCP, container: ServiceContainer) -> None:
+    """
+    Register Proxmox file transfer tools with the MCP server.
+
+    These tools are disabled when ImageKit plugin is enabled to provide
+    a unified file transfer interface.
+
+    Args:
+        mcp: FastMCP server instance
+        container: Service container with core services
+    """
+    # Get Proxmox service from plugin services
+    proxmox_service_obj = container.plugin_services.get("proxmox")
+    if not proxmox_service_obj or not isinstance(proxmox_service_obj, ProxmoxService):
+        _log.error("Proxmox service not found in plugin services")
+        return
+
+    proxmox_service: ProxmoxService = proxmox_service_obj
+
     @mcp.tool(name="proxmox_download_file_from_container")
     async def proxmox_download_file_from_container(
         ctid: Annotated[int, "Container ID to download file from"] = 100,
@@ -282,7 +306,7 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
         ] = "/tmp/file",
         permissions: Annotated[
             int | None, "File permissions as octal (e.g., 644, 755)"
-        ] = 644,
+        ] = None,
         overwrite: Annotated[
             bool, "Whether to overwrite container file if it exists (default: False)"
         ] = False,
@@ -302,7 +326,7 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             ctid: Container ID
             local_path: Local path to file to upload (e.g., './config.yaml')
             container_path: Destination path inside container (e.g., '/etc/app/config.yaml')
-            permissions: File permissions as octal (e.g., 644, 755) (default: 644)
+            permissions: File permissions as octal (e.g., 644, 755) (default: None, uses server's umask)
             overwrite: Whether to overwrite container file if exists (default: False)
 
         Returns:
@@ -313,7 +337,6 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
                 ctid=100,
                 local_path="./nginx.conf",
                 container_path="/etc/nginx/nginx.conf",
-                permissions=644,
                 overwrite=True
             )
         """
@@ -339,4 +362,4 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
         except Exception as e:
             return f"[ERROR] Unexpected error: {str(e)}"
 
-    _log.info("Registered 7 Proxmox container tools")
+    _log.info("Registered 2 Proxmox file transfer tools")
