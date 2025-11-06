@@ -40,8 +40,8 @@ def _initialize_services() -> ServiceContainer:
     config = SSHConfig()
 
     # Validate configuration
-    valid, error = config.validate()
-    if not valid:
+    _, error = config.validate()
+    if error:
         _log.error(f"Configuration validation failed: {error}")
         raise ValueError(error)
 
@@ -145,6 +145,10 @@ async def ssh_exec_command(
         Formatted command output with execution metadata
     """
     try:
+        # Validate command is not empty (required parameter)
+        if not command or not command.strip():
+            return "[ERROR] Input validation error: 'command' parameter is required and cannot be empty"
+
         # Validate input using Pydantic model
         input_data = SSHExecCommandInput(
             command=command,
@@ -205,6 +209,12 @@ def _register_ssh_file_transfer_tools() -> None:
             Transfer result with metadata (bytes transferred, speed, etc.)
         """
         try:
+            # Validate required parameters are not empty
+            if not local_path or not local_path.strip():
+                return "[ERROR] Input validation error: 'local_path' parameter is required and cannot be empty"
+            if not remote_path or not remote_path.strip():
+                return "[ERROR] Input validation error: 'remote_path' parameter is required and cannot be empty"
+
             # Validate input
             input_data = SSHUploadFileInput(
                 local_path=local_path,
@@ -259,6 +269,12 @@ def _register_ssh_file_transfer_tools() -> None:
             Transfer result with metadata (bytes transferred, speed, etc.)
         """
         try:
+            # Validate required parameters are not empty
+            if not remote_path or not remote_path.strip():
+                return "[ERROR] Input validation error: 'remote_path' parameter is required and cannot be empty"
+            if not local_path or not local_path.strip():
+                return "[ERROR] Input validation error: 'local_path' parameter is required and cannot be empty"
+
             # Validate input
             input_data = SSHDownloadFileInput(
                 remote_path=remote_path, local_path=local_path, overwrite=overwrite

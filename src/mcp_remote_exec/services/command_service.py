@@ -4,8 +4,8 @@ Command Service for SSH MCP Remote Exec
 Provides business logic for SSH command execution.
 """
 
-import datetime
 import logging
+from datetime import datetime
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
@@ -66,7 +66,7 @@ class CommandService:
                 f"Host: {host_config.name} ({host_config.host}:{host_config.port})\n"
             )
             metadata += f"User: {host_config.username}\n"
-            metadata += f"Timestamp: {datetime.datetime.now().isoformat()}"
+            metadata += f"Timestamp: {datetime.now().isoformat()}"
 
             formatted_result.content += metadata
 
