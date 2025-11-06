@@ -108,7 +108,13 @@ class SSHConnectionManager:
         try:
             client = paramiko.SSHClient()
             client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.RejectPolicy())
+
+            # Use configurable host key policy
+            if self.config.security.strict_host_key_checking:
+                client.set_missing_host_key_policy(paramiko.RejectPolicy())
+            else:
+                # Auto-add unknown hosts (less secure, convenient for containers/dev)
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             # Use config timeout value for connection
             connection_timeout = self.config.security.default_timeout

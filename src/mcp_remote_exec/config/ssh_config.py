@@ -34,6 +34,7 @@ class SecurityConfig:
     max_file_size: int
     default_timeout: int
     max_timeout: int
+    strict_host_key_checking: bool = True
 
     def validate_acceptance(self) -> tuple[bool, str | None]:
         """Validate risk acceptance - CRITICAL: Must be checked FIRST"""
@@ -89,6 +90,10 @@ class SSHConfig:
             ),
             default_timeout=int(os.getenv("TIMEOUT", str(self.DEFAULT_TIMEOUT))),
             max_timeout=self.MAX_TIMEOUT,
+            strict_host_key_checking=os.getenv(
+                "SSH_STRICT_HOST_KEY_CHECKING", "true"
+            ).lower()
+            == "true",
         )
 
         # STEP 3: Load host configuration (may fail if SSH key not found, etc.)

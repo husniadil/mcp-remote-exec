@@ -246,6 +246,11 @@ TIMEOUT=30
 
 # Optional: SSH port (default: 22)
 SSH_PORT=22
+
+# SSH host key verification (default: true)
+# true = Reject connections to unknown hosts (secure, requires known_hosts)
+# false = Auto-accept unknown hosts (convenient for containers/dev, less secure)
+SSH_STRICT_HOST_KEY_CHECKING=true
 ```
 
 **Command Input Limits:**
@@ -442,6 +447,38 @@ Failed to load private key
 - **Ed25519 Support**: Requires Paramiko >= 3.x for Ed25519 key support. Earlier versions only support RSA and ECDSA
 - Test key validity: `ssh-keygen -y -f /path/to/key`
 - If key is encrypted with passphrase, it must be decrypted first
+
+### Host Key Verification Errors
+
+```
+Server 'hostname' not found in known_hosts
+```
+
+**Problem**: The SSH host's key is not in the known_hosts file, causing strict host key checking to fail.
+
+**Solutions**:
+
+**Option 1: Add host to known_hosts (Recommended for production)**
+
+```bash
+# On the system running mcp-remote-exec
+ssh-keyscan -H your.server.com >> ~/.ssh/known_hosts
+
+# For Docker containers, add to the container's known_hosts
+docker exec container_name ssh-keyscan -H your.server.com >> /home/appuser/.ssh/known_hosts
+```
+
+**Option 2: Disable strict checking (Convenient for dev/containers)**
+
+```bash
+# In .env file
+SSH_STRICT_HOST_KEY_CHECKING=false
+```
+
+**When to use each option**:
+
+- **Strict checking (true)**: Production, security-critical environments
+- **Auto-accept (false)**: Development, Docker containers, trusted networks, frequently changing hosts
 
 ### Command Execution Errors
 
