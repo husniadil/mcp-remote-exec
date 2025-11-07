@@ -19,26 +19,31 @@ tests/
 ## Running Tests
 
 ### Run all tests
+
 ```bash
 uv run pytest tests/ -v
 ```
 
 ### Run tests with coverage
+
 ```bash
 uv run pytest tests/ -v --cov=src/mcp_remote_exec --cov-report=term-missing --cov-report=html
 ```
 
 ### Run specific test file
+
 ```bash
 uv run pytest tests/config/test_ssh_config.py -v
 ```
 
 ### Run specific test class or function
+
 ```bash
 uv run pytest tests/config/test_ssh_config.py::TestSSHConfig::test_init_with_password_auth -v
 ```
 
 ### Using taskipy shortcuts
+
 ```bash
 uv run task test         # Run all tests
 uv run task test-cov     # Run tests with coverage report
@@ -49,11 +54,13 @@ uv run task test-cov     # Run tests with coverage report
 Current test coverage focuses on:
 
 ### Config Layer (100% coverage)
+
 - `HostConfig` dataclass - authentication methods, configuration validation
 - `SecurityConfig` dataclass - security settings, limits, host key checking
 - `SSHConfig` class - initialization, validation, environment variable handling
 
 ### Data Access Layer (100% coverage for exceptions)
+
 - `SSHConnectionError` - basic connection errors
 - `AuthenticationError` - SSH authentication failures
 - `CommandExecutionError` - command execution failures
@@ -61,6 +68,7 @@ Current test coverage focuses on:
 - `FileValidationError` - file validation errors
 
 ### Services Layer (98% coverage for output_formatter)
+
 - `FormattedResult` dataclass - result formatting with metadata
 - `OutputFormatter` class - text/JSON formatting, truncation, error handling
 - Command output formatting - success/failure/timeout scenarios
@@ -80,11 +88,13 @@ Common fixtures available in `conftest.py`:
 ## Writing New Tests
 
 ### Test Naming Convention
+
 - Test files: `test_*.py`
 - Test classes: `Test*`
 - Test functions: `test_*`
 
 ### Example Test
+
 ```python
 import pytest
 from mcp_remote_exec.config.ssh_config import SSHConfig
@@ -99,6 +109,7 @@ def test_ssh_config_initialization(mock_env_minimal):
 ## Future Test Additions
 
 Areas that could benefit from additional tests:
+
 - SSH connection management (requires paramiko mocking)
 - SFTP operations (requires paramiko mocking)
 - Command and file transfer services
@@ -110,6 +121,7 @@ Areas that could benefit from additional tests:
 ## CI/CD Integration
 
 These tests are designed to run in CI/CD pipelines:
+
 - Fast execution (< 2 seconds for all tests)
 - No external dependencies required
 - Environment-based configuration via fixtures
@@ -118,11 +130,13 @@ These tests are designed to run in CI/CD pipelines:
 ## Test Markers
 
 Available pytest markers:
+
 - `@pytest.mark.unit` - Unit tests
 - `@pytest.mark.integration` - Integration tests (future)
 - `@pytest.mark.slow` - Slow tests (future)
 
 Use markers to run specific test categories:
+
 ```bash
 pytest -m unit          # Run only unit tests
 pytest -m "not slow"    # Skip slow tests
