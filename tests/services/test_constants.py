@@ -37,11 +37,14 @@ class TestConstants:
         assert isinstance(constants.MSG_CONTAINER_NOT_FOUND, str)
         assert len(constants.MSG_CONTAINER_NOT_FOUND) > 0
 
-    def test_msg_path_traversal_error_defined(self):
-        """Test path traversal error message constant is defined"""
-        assert hasattr(constants, "MSG_PATH_TRAVERSAL_ERROR")
-        assert isinstance(constants.MSG_PATH_TRAVERSAL_ERROR, str)
-        assert "traversal" in constants.MSG_PATH_TRAVERSAL_ERROR.lower()
+    def test_msg_path_traversal_error_moved(self):
+        """Test path traversal error message constant moved to data_access layer"""
+        # MSG_PATH_TRAVERSAL_ERROR was moved to data_access/constants
+        # to avoid circular dependencies (data access layer is lower)
+        from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
+
+        assert isinstance(MSG_PATH_TRAVERSAL_ERROR, str)
+        assert "traversal" in MSG_PATH_TRAVERSAL_ERROR.lower()
 
     def test_constant_values_reasonable(self):
         """Test constants have reasonable values"""
@@ -57,7 +60,10 @@ class TestConstants:
     def test_error_messages_not_empty(self):
         """Test error message constants are not empty"""
         assert constants.MSG_CONTAINER_NOT_FOUND.strip()
-        assert constants.MSG_PATH_TRAVERSAL_ERROR.strip()
+        # MSG_PATH_TRAVERSAL_ERROR moved to data_access/constants
+        from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
+
+        assert MSG_PATH_TRAVERSAL_ERROR.strip()
 
     def test_temp_file_prefix_format(self):
         """Test temp file prefix follows expected format"""

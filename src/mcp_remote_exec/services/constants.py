@@ -22,6 +22,3 @@ DEFAULT_TRANSFER_TIMEOUT_SECONDS = 3600
 # Common Error Messages
 MSG_CONTAINER_NOT_FOUND = "Use proxmox_list_containers to see available containers"
 """Suggestion message when container is not found"""
-
-MSG_PATH_TRAVERSAL_ERROR = "Path cannot contain '..' (path traversal not allowed)"
-"""Error message for path traversal attempts"""
