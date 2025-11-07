@@ -17,6 +17,7 @@ from mcp_remote_exec.data_access.exceptions import (
     CommandExecutionError,
     FileValidationError,
 )
+from mcp_remote_exec.data_access.path_validator import PathValidator
 
 __all__ = [
     "SSHConnectionManager",
@@ -28,4 +29,5 @@ __all__ = [
     "AuthenticationError",
     "CommandExecutionError",
     "FileValidationError",
+    "PathValidator",
 ]

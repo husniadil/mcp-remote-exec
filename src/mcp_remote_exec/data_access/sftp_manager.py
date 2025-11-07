@@ -5,14 +5,16 @@ Handles file upload/download operations via SFTP with security validation
 and proper error handling.
 """
 
+import logging
 import os
 import time
-import logging
-from typing import TYPE_CHECKING
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from paramiko import SFTPClient, SSHException
+
 from mcp_remote_exec.data_access.exceptions import SFTPError, FileValidationError
+from mcp_remote_exec.data_access.path_validator import PathValidator
 
 if TYPE_CHECKING:
     from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
@@ -62,30 +64,21 @@ class SFTPManager:
         remote_operation: bool = True,
         check_existence: bool = True,
     ) -> None:
-        """Validate file path for security (prevent directory traversal)"""
-        if not file_path:
-            raise FileValidationError(
-                "File path cannot be empty", file_path, "empty_path"
-            )
+        """
+        Validate file path for security (prevent directory traversal).
 
-        normalized_path = os.path.normpath(file_path)
+        Delegates to PathValidator for centralized validation logic.
 
-        # Prevent directory traversal - applies to both local and remote
-        if ".." in normalized_path:
-            raise FileValidationError(
-                f"Invalid file path: {file_path}. Directory traversal (..) not allowed.",
-                file_path,
-                "directory_traversal",
-            )
-
-        # For local upload, check file exists (when required)
-        if not remote_operation and check_existence:
-            if not os.path.exists(file_path):
-                raise FileValidationError(
-                    f"Local file does not exist: {file_path}",
-                    file_path,
-                    "file_not_found",
-                )
+        Args:
+            file_path: Path to validate
+            remote_operation: True for remote paths, False for local paths
+            check_existence: Whether to check if local file exists
+        """
+        PathValidator.validate_file_path(
+            file_path,
+            remote_operation=remote_operation,
+            check_existence=check_existence,
+        )
 
     def _validate_file_size(self, file_path: str) -> int:
         """Validate file size against limits for upload operations.

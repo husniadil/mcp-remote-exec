@@ -10,8 +10,13 @@ import os
 import uuid
 from typing import Any
 
+from mcp_remote_exec.data_access.path_validator import PathValidator
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.services.file_transfer_service import FileTransferService
+from mcp_remote_exec.services.constants import (
+    MSG_CONTAINER_NOT_FOUND,
+    TEMP_FILE_PREFIX,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -61,7 +66,7 @@ class ProxmoxService:
             ):
                 return self._format_error(
                     f"Container {ctid} not found or not accessible",
-                    "Use proxmox_list_containers to see available containers",
+                    MSG_CONTAINER_NOT_FOUND,
                     response_format,
                 )
             raise
@@ -136,7 +141,7 @@ class ProxmoxService:
             ):
                 return self._format_error(
                     f"Container {ctid} not found",
-                    "Use proxmox_list_containers to see available containers",
+                    MSG_CONTAINER_NOT_FOUND,
                     response_format,
                 )
             raise
@@ -173,7 +178,7 @@ class ProxmoxService:
                     {
                         "success": False,
                         "error": f"Container {ctid} not found",
-                        "suggestion": "Use proxmox_list_containers to see available containers",
+                        "suggestion": MSG_CONTAINER_NOT_FOUND,
                     },
                     indent=2,
                 )
@@ -214,7 +219,7 @@ class ProxmoxService:
                     {
                         "success": False,
                         "error": f"Container {ctid} not found",
-                        "suggestion": "Use proxmox_list_containers to see available containers",
+                        "suggestion": MSG_CONTAINER_NOT_FOUND,
                     },
                     indent=2,
                 )
@@ -242,12 +247,15 @@ class ProxmoxService:
         """
         _log.info(f"Downloading {container_path} from container {ctid}")
 
-        # Validate paths
-        if ".." in container_path or ".." in local_path:
+        # Validate paths for directory traversal
+        is_valid, error = PathValidator.check_paths_for_traversal(
+            container_path, local_path
+        )
+        if not is_valid:
             return json.dumps(
                 {
                     "success": False,
-                    "error": "Path cannot contain '..' (path traversal not allowed)",
+                    "error": error,
                 },
                 indent=2,
             )
@@ -264,7 +272,7 @@ class ProxmoxService:
             )
 
         # Generate temp path on host
-        temp_path = f"/tmp/mcp-proxmox-{uuid.uuid4().hex}"
+        temp_path = f"{TEMP_FILE_PREFIX}-{uuid.uuid4().hex}"
 
         try:
             # Pull file from container to host temp location
@@ -342,12 +350,15 @@ class ProxmoxService:
         """
         _log.info(f"Uploading {local_path} to container {ctid}")
 
-        # Validate paths
-        if ".." in container_path or ".." in local_path:
+        # Validate paths for directory traversal
+        is_valid, error = PathValidator.check_paths_for_traversal(
+            container_path, local_path
+        )
+        if not is_valid:
             return json.dumps(
                 {
                     "success": False,
-                    "error": "Path cannot contain '..' (path traversal not allowed)",
+                    "error": error,
                 },
                 indent=2,
             )
@@ -380,7 +391,7 @@ class ProxmoxService:
                 )
 
         # Generate temp path on host
-        temp_path = f"/tmp/mcp-proxmox-{uuid.uuid4().hex}"
+        temp_path = f"{TEMP_FILE_PREFIX}-{uuid.uuid4().hex}"
 
         try:
             # Upload from local to host temp location
