@@ -69,9 +69,7 @@ class OutputFormatter:
 
         if total_len > max_length:
             # Reserve space for JSON structure metadata
-            available_space = max(
-                max_length - JSON_METADATA_OVERHEAD, MIN_OUTPUT_SPACE
-            )
+            available_space = max(max_length - JSON_METADATA_OVERHEAD, MIN_OUTPUT_SPACE)
 
             # Allocate space proportionally
             if total_len > 0:
