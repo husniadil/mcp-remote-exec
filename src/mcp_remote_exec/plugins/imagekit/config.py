@@ -7,6 +7,8 @@ Handles ImageKit authentication and configuration.
 import os
 from dataclasses import dataclass
 
+from mcp_remote_exec.services.constants import DEFAULT_TRANSFER_TIMEOUT_SECONDS
+
 
 @dataclass
 class ImageKitConfig:
@@ -16,7 +18,7 @@ class ImageKitConfig:
     private_key: str
     url_endpoint: str
     folder: str = "/mcp-remote-exec"  # Default folder for organizing files
-    transfer_timeout: int = 3600  # 1 hour
+    transfer_timeout: int = DEFAULT_TRANSFER_TIMEOUT_SECONDS
 
     @classmethod
     def from_env(cls) -> "ImageKitConfig | None":
@@ -33,18 +35,20 @@ class ImageKitConfig:
         if not all([public_key, private_key, url_endpoint]):
             return None
 
-        # Type assertions after validation
-        assert public_key is not None
-        assert private_key is not None
-        assert url_endpoint is not None
-
-        transfer_timeout = int(os.getenv("IMAGEKIT_TRANSFER_TIMEOUT", "3600"))
+        # Type narrowing: all values are guaranteed to be str (not None) after check above
+        # Mypy will understand these are str, not str | None
+        transfer_timeout = int(
+            os.getenv(
+                "IMAGEKIT_TRANSFER_TIMEOUT", str(DEFAULT_TRANSFER_TIMEOUT_SECONDS)
+            )
+        )
         folder = os.getenv("IMAGEKIT_FOLDER", "/mcp-remote-exec")
 
+        # At this point, type checker knows public_key, private_key, url_endpoint are str
         return cls(
-            public_key=public_key,
-            private_key=private_key,
-            url_endpoint=url_endpoint,
+            public_key=public_key,  # type: ignore[arg-type]
+            private_key=private_key,  # type: ignore[arg-type]
+            url_endpoint=url_endpoint,  # type: ignore[arg-type]
             folder=folder,
             transfer_timeout=transfer_timeout,
         )
