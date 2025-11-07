@@ -8,6 +8,14 @@ with flexible authentication methods.
 import os
 from dataclasses import dataclass
 
+from mcp_remote_exec.constants import (
+    DEFAULT_CHARACTER_LIMIT,
+    DEFAULT_MAX_FILE_SIZE,
+    DEFAULT_TIMEOUT,
+    MAX_TIMEOUT,
+    DEFAULT_SSH_PORT,
+)
+
 
 @dataclass
 class HostConfig:
@@ -44,12 +52,12 @@ class SecurityConfig:
 class SSHConfig:
     """Main SSH configuration class"""
 
-    # Constants
-    DEFAULT_CHARACTER_LIMIT = 25000
-    DEFAULT_MAX_FILE_SIZE = 10485760  # 10MB
-    DEFAULT_TIMEOUT = 30
-    MAX_TIMEOUT = 300
-    DEFAULT_SSH_PORT = 22
+    # Constants (imported from centralized constants module)
+    DEFAULT_CHARACTER_LIMIT = DEFAULT_CHARACTER_LIMIT
+    DEFAULT_MAX_FILE_SIZE = DEFAULT_MAX_FILE_SIZE
+    DEFAULT_TIMEOUT = DEFAULT_TIMEOUT
+    MAX_TIMEOUT = MAX_TIMEOUT
+    DEFAULT_SSH_PORT = DEFAULT_SSH_PORT
 
     def __init__(self) -> None:
         """Initialize configuration from environment variables"""

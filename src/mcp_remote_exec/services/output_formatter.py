@@ -223,7 +223,7 @@ class OutputFormatter:
             format_type="text",
         )
 
-    def get_summary_stats(self, result: FormattedResult) -> dict:
+    def get_summary_stats(self, result: FormattedResult) -> dict[str, int | str | bool]:
         """Get summary statistics about the formatted result"""
 
         return {

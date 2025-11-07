@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Dict, Any
+from typing import Any
 
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig
 from mcp_remote_exec.plugins.imagekit.imagekit_client import ImageKitClient
@@ -190,7 +190,7 @@ class ImageKitService:
 
         try:
             # Get file info - either by ID or by searching
-            file_info: Dict[str, Any] | None
+            file_info: dict[str, Any] | None
             if file_id:
                 _log.info(f"Using provided file_id: {file_id}")
                 # When file_id is provided, we only need the ID for download
@@ -230,7 +230,8 @@ class ImageKitService:
                 )
 
                 # Upload from MCP server to host temp location via SFTP
-                host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"
+                # Path is on remote SSH server, not local system
+                host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"  # nosec B108
                 upload_result = self.sftp_manager.upload_file(
                     local_path=local_temp_path,
                     remote_path=host_temp_path,
@@ -415,7 +416,8 @@ class ImageKitService:
             host_temp_path = None
             if ctid:
                 _log.info(f"Pulling file from container {ctid}: {remote_path}")
-                host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"
+                # Path is on remote SSH server, not local system
+                host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"  # nosec B108
 
                 ssh = self.connection_manager.get_connection()
                 pull_cmd = f"pct pull {ctid} {remote_path} {host_temp_path}"

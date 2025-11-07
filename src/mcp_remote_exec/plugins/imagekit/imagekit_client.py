@@ -6,7 +6,7 @@ Handles ImageKit SDK operations for file uploads/downloads.
 
 import logging
 import os
-from typing import Dict, Any
+from typing import Any
 
 import requests
 from imagekitio import ImageKit
@@ -37,7 +37,7 @@ class ImageKitClient:
             url_endpoint=config.url_endpoint,
         )
 
-    def generate_upload_token(self, file_name: str) -> Dict[str, Any]:
+    def generate_upload_token(self, file_name: str) -> dict[str, Any]:
         """
         Generate authentication parameters for client-side upload.
 
@@ -87,7 +87,7 @@ class ImageKitClient:
 
         return cmd
 
-    def upload_file(self, file_path: str, file_name: str) -> Dict[str, Any]:
+    def upload_file(self, file_path: str, file_name: str) -> dict[str, Any]:
         """
         Upload file to ImageKit (server-side).
 
@@ -149,8 +149,8 @@ class ImageKitClient:
         # Get file URL
         file_url = self.get_file_url(file_id)
 
-        # Download file
-        response = requests.get(file_url)
+        # Download file with timeout (30s connect, 300s read for large files)
+        response = requests.get(file_url, timeout=(30, 300))
         response.raise_for_status()
 
         # Ensure directory exists
@@ -185,7 +185,7 @@ class ImageKitClient:
             _log.error(f"Failed to delete file {file_id}: {e}")
             return False
 
-    def get_file_by_name(self, file_name: str) -> Dict[str, Any] | None:
+    def get_file_by_name(self, file_name: str) -> dict[str, Any] | None:
         """
         Search for file by name using ImageKit search API.
 

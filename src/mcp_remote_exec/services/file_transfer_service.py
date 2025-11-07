@@ -5,6 +5,7 @@ Provides business logic for file upload/download operations with validation.
 """
 
 import logging
+from datetime import datetime
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager, FileTransferResult
@@ -103,8 +104,6 @@ class FileTransferService:
         permissions: int | None = None,
     ) -> str:
         """Add metadata to file transfer result"""
-
-        from datetime import datetime
 
         host_config = self.config.get_host()
         metadata = [

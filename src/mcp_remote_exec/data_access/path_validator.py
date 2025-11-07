@@ -5,7 +5,6 @@ Centralized path validation to prevent directory traversal and ensure file secur
 """
 
 import os
-from typing import Tuple
 
 from mcp_remote_exec.data_access.exceptions import FileValidationError
 from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
@@ -91,7 +90,7 @@ class PathValidator:
     @staticmethod
     def check_paths_for_traversal(
         *paths: str,
-    ) -> Tuple[bool, str | None]:
+    ) -> tuple[bool, str | None]:
         """
         Check multiple paths for directory traversal attempts.
 

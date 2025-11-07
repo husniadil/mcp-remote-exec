@@ -25,7 +25,15 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run_stdio_mode() -> None:
-    """Run MCP server"""
+    """
+    Run MCP server in stdio mode.
+
+    Initializes services, loads plugins, and starts the MCP server.
+    Handles graceful shutdown on keyboard interrupt.
+
+    Raises:
+        SystemExit: On configuration errors or exceptions
+    """
     try:
         # Eagerly initialize services to log activated plugins
         from mcp_remote_exec.presentation.mcp_tools import get_services
@@ -42,7 +50,12 @@ def run_stdio_mode() -> None:
 
 
 def parse_command_line() -> None:
-    """Parse command line arguments"""
+    """
+    Parse and handle command line arguments.
+
+    Checks for --help/-h and --version/-v flags and handles them appropriately.
+    Exits the program if these flags are found.
+    """
     if "--help" in sys.argv or "-h" in sys.argv:
         print_help()
         sys.exit(0)
@@ -53,7 +66,11 @@ def parse_command_line() -> None:
 
 
 def print_help() -> None:
-    """Print help information"""
+    """
+    Print usage and help information to stdout.
+
+    Displays command-line usage, options, and environment variable requirements.
+    """
     print("""SSH MCP Remote Exec
 
 USAGE:
@@ -73,7 +90,11 @@ For detailed configuration, see .env.example
 
 
 def print_version() -> None:
-    """Print version information"""
+    """
+    Print version information to stdout.
+
+    Displays the current version of mcp-remote-exec.
+    """
     print(f"mcp-remote-exec version {__version__}")
 
 

@@ -114,7 +114,8 @@ class SSHConnectionManager:
                 client.set_missing_host_key_policy(paramiko.RejectPolicy())
             else:
                 # Auto-add unknown hosts (less secure, convenient for containers/dev)
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                # User-configurable via SSH_STRICT_HOST_KEY_CHECKING env var
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # nosec B507
 
             # Use config timeout value for connection
             connection_timeout = self.config.security.default_timeout

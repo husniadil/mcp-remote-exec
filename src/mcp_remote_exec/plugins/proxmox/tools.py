@@ -303,7 +303,7 @@ def register_proxmox_file_tools(mcp: FastMCP, container: ServiceContainer) -> No
         local_path: Annotated[str, "Local path to file to upload"] = "./file",
         container_path: Annotated[
             str, "Destination path inside container"
-        ] = "/tmp/file",
+        ] = "/tmp/file",  # nosec B108  # Example path on remote container
         permissions: Annotated[
             int | None, "File permissions as octal (e.g., 644, 755)"
         ] = None,

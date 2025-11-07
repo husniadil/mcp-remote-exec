@@ -455,8 +455,8 @@ class ProxmoxService:
         """Remove temporary file on Proxmox host"""
         try:
             self.command_service.execute_command(f"rm -f {temp_path}", 5, "text")
-        except Exception:
-            # Ignore cleanup errors
+        except Exception:  # nosec B110
+            # Ignore cleanup errors - best effort temp file removal
             pass
 
     def _extract_stdout(self, result: str) -> str:
