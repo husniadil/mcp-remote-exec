@@ -230,7 +230,8 @@ class ImageKitService:
                 )
 
                 # Upload from MCP server to host temp location via SFTP
-                host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"
+                # Path is on remote SSH server, not local system
+                host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"  # nosec B108
                 upload_result = self.sftp_manager.upload_file(
                     local_path=local_temp_path,
                     remote_path=host_temp_path,
@@ -415,7 +416,8 @@ class ImageKitService:
             host_temp_path = None
             if ctid:
                 _log.info(f"Pulling file from container {ctid}: {remote_path}")
-                host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"
+                # Path is on remote SSH server, not local system
+                host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"  # nosec B108
 
                 ssh = self.connection_manager.get_connection()
                 pull_cmd = f"pct pull {ctid} {remote_path} {host_temp_path}"

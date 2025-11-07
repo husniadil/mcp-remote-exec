@@ -149,8 +149,8 @@ class ImageKitClient:
         # Get file URL
         file_url = self.get_file_url(file_id)
 
-        # Download file
-        response = requests.get(file_url)
+        # Download file with timeout (30s connect, 300s read for large files)
+        response = requests.get(file_url, timeout=(30, 300))
         response.raise_for_status()
 
         # Ensure directory exists

@@ -5,6 +5,9 @@ Centralized constants for the entire application including SSH configuration,
 output formatting, file operations, and validation messages.
 """
 
+import os
+import tempfile
+
 # =============================================================================
 # SSH Configuration Constants
 # =============================================================================
@@ -38,7 +41,7 @@ MIN_OUTPUT_SPACE = 1000
 # Temporary File Constants
 # =============================================================================
 
-TEMP_FILE_PREFIX = "/tmp/mcp-proxmox"
+TEMP_FILE_PREFIX = os.path.join(tempfile.gettempdir(), "mcp-proxmox")
 """Prefix for temporary files created during Proxmox operations"""
 
 # =============================================================================
