@@ -32,11 +32,11 @@ class ImageKitConfig:
         private_key = os.getenv("IMAGEKIT_PRIVATE_KEY")
         url_endpoint = os.getenv("IMAGEKIT_URL_ENDPOINT")
 
-        if not all([public_key, private_key, url_endpoint]):
+        # Explicit None checks for type narrowing
+        if public_key is None or private_key is None or url_endpoint is None:
             return None
 
-        # Type narrowing: all values are guaranteed to be str (not None) after check above
-        # Mypy will understand these are str, not str | None
+        # Type checker now knows these are str (not None)
         transfer_timeout = int(
             os.getenv(
                 "IMAGEKIT_TRANSFER_TIMEOUT", str(DEFAULT_TRANSFER_TIMEOUT_SECONDS)
@@ -44,11 +44,10 @@ class ImageKitConfig:
         )
         folder = os.getenv("IMAGEKIT_FOLDER", "/mcp-remote-exec")
 
-        # At this point, type checker knows public_key, private_key, url_endpoint are str
         return cls(
-            public_key=public_key,  # type: ignore[arg-type]
-            private_key=private_key,  # type: ignore[arg-type]
-            url_endpoint=url_endpoint,  # type: ignore[arg-type]
+            public_key=public_key,
+            private_key=private_key,
+            url_endpoint=url_endpoint,
             folder=folder,
             transfer_timeout=transfer_timeout,
         )

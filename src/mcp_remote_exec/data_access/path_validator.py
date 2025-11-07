@@ -8,9 +8,7 @@ import os
 from typing import Tuple
 
 from mcp_remote_exec.data_access.exceptions import FileValidationError
-
-# Import from services causes circular dependency, so we define the constant here
-MSG_PATH_TRAVERSAL_ERROR = "Path cannot contain '..' (path traversal not allowed)"
+from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
 
 
 class PathValidator:
@@ -97,6 +95,9 @@ class PathValidator:
         """
         Check multiple paths for directory traversal attempts.
 
+        Uses normalized path checking for security - normalizes path first,
+        then checks for ".." to prevent bypass attempts like "foo/./.."
+
         Args:
             *paths: Variable number of paths to check
 
@@ -106,6 +107,8 @@ class PathValidator:
             - error_message: None if valid, error description if invalid
         """
         for path in paths:
-            if ".." in path:
+            # Normalize path before checking to prevent bypass attempts
+            normalized_path = os.path.normpath(path)
+            if ".." in normalized_path:
                 return False, MSG_PATH_TRAVERSAL_ERROR
         return True, None
