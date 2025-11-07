@@ -7,7 +7,6 @@ Tracks active file transfers and handles cleanup.
 import logging
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict
 
 from mcp_remote_exec.plugins.imagekit.models import TransferState, TransferOperation
 
@@ -25,7 +24,7 @@ class TransferManager:
             timeout_seconds: Transfer timeout in seconds (default: 3600 = 1 hour)
         """
         self.timeout_seconds = timeout_seconds
-        self._transfers: Dict[str, TransferState] = {}
+        self._transfers: dict[str, TransferState] = {}
 
     def create_transfer(
         self,

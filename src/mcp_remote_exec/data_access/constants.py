@@ -1,9 +1,10 @@
 """
 Constants for Data Access Layer
 
-Centralized constants for data access operations including validation messages.
+This module re-exports constants from the centralized constants module for
+backward compatibility. New code should import directly from mcp_remote_exec.constants.
 """
 
-# Path Validation Messages
-MSG_PATH_TRAVERSAL_ERROR = "Path cannot contain '..' (path traversal not allowed)"
-"""Error message for path traversal attempts"""
+from mcp_remote_exec.constants import MSG_PATH_TRAVERSAL_ERROR
+
+__all__ = ["MSG_PATH_TRAVERSAL_ERROR"]

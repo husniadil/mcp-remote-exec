@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Dict, Any
+from typing import Any
 
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig
 from mcp_remote_exec.plugins.imagekit.imagekit_client import ImageKitClient
@@ -190,7 +190,7 @@ class ImageKitService:
 
         try:
             # Get file info - either by ID or by searching
-            file_info: Dict[str, Any] | None
+            file_info: dict[str, Any] | None
             if file_id:
                 _log.info(f"Using provided file_id: {file_id}")
                 # When file_id is provided, we only need the ID for download
