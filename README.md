@@ -354,6 +354,16 @@ Upload script: ./install.sh to /opt/scripts/install.sh
 ### Running Tests
 
 ```bash
+# Run unit tests
+uv run pytest tests/ -v
+
+# Run tests with coverage report
+uv run pytest tests/ -v --cov=src/mcp_remote_exec --cov-report=term-missing --cov-report=html
+
+# Using taskipy shortcuts
+uv run task test         # Run all tests
+uv run task test-cov     # Run tests with coverage
+
 # Run in development mode
 uv run mcp-remote-exec --help
 
