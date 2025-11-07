@@ -87,22 +87,23 @@ class SFTPManager:
                     "file_not_found",
                 )
 
-    def _validate_file_size(self, file_path: str, transfer_type: str = "upload") -> int:
-        """Validate file size against limits"""
+    def _validate_file_size(self, file_path: str) -> int:
+        """Validate file size against limits for upload operations.
+
+        Note: For downloads, file size is validated in download_file() after
+        retrieving remote file stats via SFTP. This method is only used for uploads.
+        """
         max_size = self.connection_manager.config.security.max_file_size
 
-        if transfer_type == "upload":
-            # Local file size check
-            if not os.path.exists(file_path):
-                raise FileValidationError(
-                    f"Local file does not exist: {file_path}",
-                    file_path,
-                    "file_not_found",
-                )
+        # Local file size check for upload
+        if not os.path.exists(file_path):
+            raise FileValidationError(
+                f"Local file does not exist: {file_path}",
+                file_path,
+                "file_not_found",
+            )
 
-            file_size = os.path.getsize(file_path)
-        else:
-            file_size = max_size  # For download, we trust the limit
+        file_size = os.path.getsize(file_path)
 
         if file_size > max_size:
             size_mb = file_size / (1024 * 1024)
@@ -122,7 +123,21 @@ class SFTPManager:
         permissions: int | None = None,
         overwrite: bool = False,
     ) -> FileTransferResult:
-        """Upload file to remote host via SFTP"""
+        """Upload file to remote host via SFTP
+
+        Args:
+            local_path: Path to local file to upload
+            remote_path: Destination path on remote server
+            permissions: File permissions in octal notation as decimal integer.
+                        User provides: 644 (representing octal notation)
+                        Converts to: 0o644 (420 in decimal) = rw-r--r--
+                        Common values: 644 (rw-r--r--), 755 (rwxr-xr-x),
+                                     600 (rw-------), 700 (rwx------)
+            overwrite: Whether to overwrite existing remote files
+
+        Returns:
+            FileTransferResult with success status and metadata
+        """
 
         # Validate inputs
         try:
@@ -130,7 +145,7 @@ class SFTPManager:
                 local_path, remote_operation=False, check_existence=True
             )
             self._validate_file_path(remote_path, remote_operation=True)
-            file_size = self._validate_file_size(local_path, "upload")
+            file_size = self._validate_file_size(local_path)
         except FileValidationError as e:
             return FileTransferResult(
                 success=False,
@@ -185,23 +200,11 @@ class SFTPManager:
             # Set file permissions if specified
             if permissions is not None:
                 try:
-                    # PERMISSION CONVERSION: Octal notation as decimal integer
-                    # User provides: 644 (decimal integer representing octal notation)
-                    # We convert: "644" -> parse as base-8 -> 0o644 (420 in decimal) = rw-r--r--
-                    #
-                    # Why this approach?
-                    # - Intuitive: Users think "chmod 644" and provide 644
-                    # - Type-safe: Still uses integer type in API
-                    # - Constraint: Each digit must be 0-7 (validated by Pydantic 0-777 range)
-                    #
-                    # Common values:
-                    # - 644 -> rw-r--r-- (owner: read+write, group: read, others: read)
-                    # - 755 -> rwxr-xr-x (owner: all, group: read+execute, others: read+execute)
-                    # - 600 -> rw------- (owner: read+write only)
-                    # - 700 -> rwx------ (owner: all permissions only)
-
-                    # Validate all digits are 0-7 before conversion
+                    # Convert octal notation (as decimal int) to actual octal value
+                    # Example: 644 -> int("644", 8) -> 0o644 (420 in decimal)
                     perm_str = str(permissions)
+
+                    # Validate all digits are 0-7 (valid octal)
                     if not all(c in "01234567" for c in perm_str):
                         raise ValueError(
                             f"Invalid octal notation: {permissions}. Each digit must be 0-7. "

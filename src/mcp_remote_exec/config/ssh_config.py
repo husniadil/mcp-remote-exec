@@ -27,7 +27,11 @@ class HostConfig:
 
 @dataclass
 class SecurityConfig:
-    """Security and limit configurations"""
+    """Security and limit configurations
+
+    Note: Risk acceptance is validated during SSHConfig initialization,
+    not through a separate method call.
+    """
 
     accept_risks: bool
     character_limit: int
@@ -35,21 +39,6 @@ class SecurityConfig:
     default_timeout: int
     max_timeout: int
     strict_host_key_checking: bool = True
-
-    def validate_acceptance(self) -> tuple[bool, str | None]:
-        """Validate risk acceptance - CRITICAL: Must be checked FIRST"""
-        if not self.accept_risks:
-            return False, (
-                "You must explicitly accept the risks before using this software.\n"
-                "Set environment variable: I_ACCEPT_RISKS=true\n\n"
-                "By setting this to 'true', you acknowledge that:\n"
-                "  - You understand the risks of giving AI system SSH access to your infrastructure\n"
-                "  - You are solely responsible for reviewing and approving commands\n"
-                "  - You have proper backups and disaster recovery procedures in place\n"
-                "  - You will not hold the developer(s) liable for any damages or losses\n\n"
-                "See README DISCLAIMER section for full details."
-            )
-        return True, None
 
 
 class SSHConfig:
@@ -137,10 +126,15 @@ class SSHConfig:
         return self.host
 
     def validate(self) -> tuple[bool, str | None]:
-        """Validate configuration completely
+        """Validate SSH authentication configuration.
 
-        Note: Risk acceptance is now checked in __init__ before this method is called.
-        This method validates remaining configuration aspects.
+        Checks that at least one authentication method (password or SSH key) is configured.
+
+        Note: Risk acceptance and SSH key file existence are validated during __init__,
+        before this method is called.
+
+        Returns:
+            Tuple of (is_valid, error_message). error_message is None if valid.
         """
 
         # Validate host has authentication

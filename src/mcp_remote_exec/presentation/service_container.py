@@ -17,7 +17,19 @@ from mcp_remote_exec.services.output_formatter import OutputFormatter
 
 @dataclass
 class ServiceContainer:
-    """Container for all application services with proper typing"""
+    """Container for all application services with proper typing
+
+    Attributes:
+        config: SSH configuration
+        connection_manager: SSH connection manager
+        sftp_manager: SFTP file transfer manager
+        command_service: Command execution service
+        file_service: File transfer service
+        output_formatter: Output formatting service
+        plugin_services: Plugin service instances (key: plugin name, value: service instance)
+                        Common keys: "proxmox" (ProxmoxService), "imagekit" (ImageKitService)
+        enabled_plugins: Set of plugin names that are currently enabled
+    """
 
     config: SSHConfig
     connection_manager: SSHConnectionManager

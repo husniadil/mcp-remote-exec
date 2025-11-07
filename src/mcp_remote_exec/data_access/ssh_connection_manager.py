@@ -191,11 +191,12 @@ class SSHConnectionManager:
             client = self.get_connection()
 
             # Execute command with timeout
-            # Security note: Commands are executed directly via SSH protocol, not through a shell interpreter.
-            # While the command IS executed on the remote system, Paramiko doesn't invoke /bin/sh -c,
-            # making traditional shell injection less applicable. The actual security boundary is the
-            # MCP server's authentication, authorization, and the configured SSH user's permissions.
-            # Users must ensure proper access controls and monitoring are in place.
+            # Security note: Commands are sent via SSH protocol directly to the remote server.
+            # Paramiko does not perform local shell interpretation, but the remote SSH server
+            # may invoke a shell (typically /bin/sh or user's login shell) to execute commands.
+            # The security boundary is the MCP server's authentication, authorization, and the
+            # configured SSH user's permissions on the remote system. Users must ensure proper
+            # access controls, command review, and monitoring are in place.
             stdin, stdout, stderr = client.exec_command(command, timeout=timeout)  # nosec B601
 
             # Read output with error handling
