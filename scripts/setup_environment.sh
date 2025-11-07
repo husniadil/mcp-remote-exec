@@ -14,6 +14,10 @@ fi
 
 echo "Setting up environment for Claude Code on the web..."
 
+# Install system packages
+echo "Installing system packages..."
+apt-get update -qq && apt-get install -y -qq tree > /dev/null 2>&1 || echo "Warning: Could not install tree command"
+
 # Install dependencies using uv
 echo "Installing project dependencies with uv..."
 uv sync
