@@ -3,6 +3,8 @@
 import os
 import pytest
 from unittest.mock import patch
+
+from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.ssh_config import SSHConfig, HostConfig, SecurityConfig
 
 
@@ -76,13 +78,13 @@ class TestSSHConfig:
     def test_init_without_risk_acceptance(self):
         """Test initialization fails without risk acceptance"""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="You must explicitly accept the risks"):
+            with pytest.raises(ConfigError, match="You must explicitly accept the risks"):
                 SSHConfig()
 
     def test_init_with_risk_acceptance_false(self):
         """Test initialization fails with explicit false"""
         with patch.dict(os.environ, {"I_ACCEPT_RISKS": "false"}, clear=True):
-            with pytest.raises(ValueError, match="You must explicitly accept the risks"):
+            with pytest.raises(ConfigError, match="You must explicitly accept the risks"):
                 SSHConfig()
 
     def test_init_without_host(self):
@@ -90,7 +92,7 @@ class TestSSHConfig:
         with patch.dict(
             os.environ, {"I_ACCEPT_RISKS": "true"}, clear=True
         ):
-            with pytest.raises(ValueError, match="No SSH host configuration found"):
+            with pytest.raises(ConfigError, match="No SSH host configuration found"):
                 SSHConfig()
 
     def test_init_without_authentication(self):
@@ -101,7 +103,7 @@ class TestSSHConfig:
             "SSH_USERNAME": "user",
         }
         with patch.dict(os.environ, env, clear=True):
-            with pytest.raises(ValueError, match="No authentication configured"):
+            with pytest.raises(ConfigError, match="No authentication configured"):
                 SSHConfig()
 
     def test_init_with_password_auth(self):
@@ -145,7 +147,7 @@ class TestSSHConfig:
             "SSH_KEY": "/path/to/nonexistent/key",
         }
         with patch.dict(os.environ, env, clear=True):
-            with pytest.raises(ValueError, match="SSH key file not found"):
+            with pytest.raises(ConfigError, match="SSH key file not found"):
                 SSHConfig()
 
     def test_init_with_custom_port(self):

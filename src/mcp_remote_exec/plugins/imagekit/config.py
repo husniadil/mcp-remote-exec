@@ -7,7 +7,7 @@ Handles ImageKit authentication and configuration.
 import os
 from dataclasses import dataclass
 
-from mcp_remote_exec.services.constants import DEFAULT_TRANSFER_TIMEOUT_SECONDS
+from mcp_remote_exec.constants import DEFAULT_TRANSFER_TIMEOUT_SECONDS
 
 
 @dataclass

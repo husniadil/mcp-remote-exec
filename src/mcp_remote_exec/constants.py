@@ -41,8 +41,8 @@ MIN_OUTPUT_SPACE = 1000
 # Temporary File Constants
 # =============================================================================
 
-TEMP_FILE_PREFIX = os.path.join(tempfile.gettempdir(), "mcp-proxmox")
-"""Prefix for temporary files created during Proxmox operations"""
+TEMP_FILE_PREFIX = os.path.join(tempfile.gettempdir(), "mcp-remote-exec")
+"""Prefix for temporary files created during file transfer operations"""
 
 # =============================================================================
 # Transfer Timeouts

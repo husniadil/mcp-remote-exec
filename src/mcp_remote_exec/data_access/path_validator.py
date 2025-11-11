@@ -6,8 +6,8 @@ Centralized path validation to prevent directory traversal and ensure file secur
 
 import os
 
+from mcp_remote_exec.constants import MSG_PATH_TRAVERSAL_ERROR
 from mcp_remote_exec.data_access.exceptions import FileValidationError
-from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
 
 
 class PathValidator:

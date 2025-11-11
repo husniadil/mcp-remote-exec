@@ -9,22 +9,19 @@ import json
 from dataclasses import dataclass
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
+from mcp_remote_exec.constants import JSON_METADATA_OVERHEAD, MIN_OUTPUT_SPACE
 from mcp_remote_exec.data_access.ssh_connection_manager import ExecutionResult
 from mcp_remote_exec.data_access.sftp_manager import FileTransferResult
-from mcp_remote_exec.services.constants import (
-    JSON_METADATA_OVERHEAD,
-    MIN_OUTPUT_SPACE,
-)
 
 
 @dataclass
 class FormattedResult:
     """Formatted operation result with metadata"""
 
-    content: str
-    truncated: bool = False
-    original_length: int | None = None
-    format_type: str = "text"
+    content: str  # The formatted output content (may be truncated)
+    truncated: bool = False  # Whether the output was truncated due to size limits
+    original_length: int | None = None  # Original content length before truncation (None if not truncated)
+    format_type: str = "text"  # Output format type: "text" for human-readable, "json" for structured data
 
 
 class OutputFormatter:

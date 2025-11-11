@@ -8,6 +8,7 @@ with flexible authentication methods.
 import os
 from dataclasses import dataclass
 
+from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.constants import (
     DEFAULT_CHARACTER_LIMIT,
     DEFAULT_MAX_FILE_SIZE,
@@ -65,7 +66,7 @@ class SSHConfig:
         # This is the most critical validation and must fail fast
         accept_risks = os.getenv("I_ACCEPT_RISKS", "false").lower() == "true"
         if not accept_risks:
-            raise ValueError(
+            raise ConfigError(
                 "You must explicitly accept the risks before using this software.\n"
                 "Set environment variable: I_ACCEPT_RISKS=true\n\n"
                 "By setting this to 'true', you acknowledge that:\n"
@@ -99,13 +100,13 @@ class SSHConfig:
         # STEP 4: Validate remaining configuration (authentication, etc.)
         valid, error = self.validate()
         if not valid:
-            raise ValueError(error)
+            raise ConfigError(error)
 
     def _load_host_config(self) -> HostConfig:
         """Load SSH host configuration from environment variables"""
         host = os.getenv("HOST")
         if not host:
-            raise ValueError(
+            raise ConfigError(
                 "No SSH host configuration found. Set HOST environment variable"
             )
 
@@ -115,7 +116,7 @@ class SSHConfig:
 
         # Validate SSH key path exists if specified
         if key_path and not os.path.exists(key_path):
-            raise ValueError(
+            raise ConfigError(
                 f"SSH key file not found: {key_path}. "
                 "Verify SSH_KEY environment variable points to a valid private key file."
             )

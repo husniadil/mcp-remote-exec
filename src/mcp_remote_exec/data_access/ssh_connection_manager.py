@@ -6,10 +6,11 @@ Supports both password and SSH key authentication with multi-format key support
 (RSA, ED25519, ECDSA). Handles SSH key loading, connection pooling, and cleanup.
 """
 
-import socket
-import paramiko
 import logging
+import socket
 from dataclasses import dataclass
+
+import paramiko
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.exceptions import (
@@ -25,11 +26,11 @@ _log = logging.getLogger(__name__)
 class ExecutionResult:
     """Result of SSH command execution"""
 
-    exit_code: int
-    stdout: str
-    stderr: str
-    timeout_reached: bool = False
-    command: str = ""
+    exit_code: int  # Command exit code (0 = success, non-zero = error)
+    stdout: str  # Standard output from command execution
+    stderr: str  # Standard error output from command execution
+    timeout_reached: bool = False  # Whether command execution timed out
+    command: str = ""  # The command that was executed
 
 
 class SSHConnectionManager:

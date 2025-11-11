@@ -8,6 +8,8 @@ import logging
 from typing import Annotated
 
 from fastmcp import FastMCP
+
+from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager
@@ -43,7 +45,7 @@ def _initialize_services() -> ServiceContainer:
     _, error = config.validate()
     if error:
         _log.error(f"Configuration validation failed: {error}")
-        raise ValueError(error)
+        raise ConfigError(error)
 
     _log.info(f"Configuration validated. Host: {config.get_host().name}")
 

@@ -26,13 +26,13 @@ _log = logging.getLogger(__name__)
 class FileTransferResult:
     """Result of file transfer operation"""
 
-    success: bool
-    message: str
-    bytes_transferred: int = 0
-    transfer_speed: float = 0.0  # bytes per second
-    local_path: str | None = None
-    remote_path: str | None = None
-    operation: str = ""  # "upload" or "download"
+    success: bool  # Whether the file transfer completed successfully
+    message: str  # Human-readable result or error message
+    bytes_transferred: int = 0  # Total number of bytes transferred
+    transfer_speed: float = 0.0  # Transfer speed in bytes per second
+    local_path: str | None = None  # Local file system path (source for upload, destination for download)
+    remote_path: str | None = None  # Remote server path (destination for upload, source for download)
+    operation: str = ""  # Type of operation: "upload" or "download"
 
 
 class SFTPManager:

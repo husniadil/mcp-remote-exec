@@ -1,7 +1,8 @@
 """Tests for Service Constants"""
 
 import pytest
-from mcp_remote_exec.services import constants
+
+from mcp_remote_exec import constants
 
 
 class TestConstants:
@@ -21,9 +22,11 @@ class TestConstants:
 
     def test_temp_file_prefix_defined(self):
         """Test temp file prefix constant is defined"""
+        import tempfile
         assert hasattr(constants, "TEMP_FILE_PREFIX")
         assert isinstance(constants.TEMP_FILE_PREFIX, str)
-        assert constants.TEMP_FILE_PREFIX.startswith("/tmp")
+        # Should use system temp directory (varies by OS)
+        assert constants.TEMP_FILE_PREFIX.startswith(tempfile.gettempdir())
 
     def test_default_transfer_timeout_defined(self):
         """Test default transfer timeout constant is defined"""
@@ -37,14 +40,11 @@ class TestConstants:
         assert isinstance(constants.MSG_CONTAINER_NOT_FOUND, str)
         assert len(constants.MSG_CONTAINER_NOT_FOUND) > 0
 
-    def test_msg_path_traversal_error_moved(self):
-        """Test path traversal error message constant moved to data_access layer"""
-        # MSG_PATH_TRAVERSAL_ERROR was moved to data_access/constants
-        # to avoid circular dependencies (data access layer is lower)
-        from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
-
-        assert isinstance(MSG_PATH_TRAVERSAL_ERROR, str)
-        assert "traversal" in MSG_PATH_TRAVERSAL_ERROR.lower()
+    def test_msg_path_traversal_error_exists(self):
+        """Test path traversal error message constant exists"""
+        assert hasattr(constants, "MSG_PATH_TRAVERSAL_ERROR")
+        assert isinstance(constants.MSG_PATH_TRAVERSAL_ERROR, str)
+        assert "traversal" in constants.MSG_PATH_TRAVERSAL_ERROR.lower()
 
     def test_constant_values_reasonable(self):
         """Test constants have reasonable values"""
@@ -60,15 +60,16 @@ class TestConstants:
     def test_error_messages_not_empty(self):
         """Test error message constants are not empty"""
         assert constants.MSG_CONTAINER_NOT_FOUND.strip()
-        # MSG_PATH_TRAVERSAL_ERROR moved to data_access/constants
-        from mcp_remote_exec.data_access.constants import MSG_PATH_TRAVERSAL_ERROR
-
-        assert MSG_PATH_TRAVERSAL_ERROR.strip()
+        assert constants.MSG_PATH_TRAVERSAL_ERROR.strip()
 
     def test_temp_file_prefix_format(self):
         """Test temp file prefix follows expected format"""
+        import tempfile
+        import os
         prefix = constants.TEMP_FILE_PREFIX
-        # Should start with /tmp
-        assert prefix.startswith("/tmp/")
-        # Should contain identifier
-        assert "mcp" in prefix or "proxmox" in prefix
+        # Should start with system temp directory
+        assert prefix.startswith(tempfile.gettempdir())
+        # Should contain project identifier
+        assert "mcp-remote-exec" in prefix
+        # Should be valid directory path format
+        assert os.path.isabs(prefix)
