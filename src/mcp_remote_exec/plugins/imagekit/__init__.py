@@ -64,7 +64,7 @@ class ImageKitPlugin(BasePlugin):
         imagekit_service = ImageKitService(
             config=self._config,
             command_service=container.command_service,
-            sftp_manager=container.sftp_manager,
+            file_service=container.file_service,
             enabled_plugins=container.enabled_plugins,
         )
 

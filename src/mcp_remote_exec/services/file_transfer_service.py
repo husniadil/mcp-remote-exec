@@ -97,6 +97,61 @@ class FileTransferService:
             _log.error(f"{error_msg} - {context}")
             return self.output_formatter.format_error_result(error_msg, context).content
 
+    def download_file_raw(
+        self, remote_path: str, local_path: str, overwrite: bool = False
+    ) -> FileTransferResult:
+        """Download file from remote server and return raw result.
+
+        This method is intended for plugin services that need to process
+        transfer results programmatically. For user-facing operations,
+        use download_file() which provides formatted output.
+
+        Args:
+            remote_path: Path to file on remote server
+            local_path: Local destination path
+            overwrite: Whether to overwrite existing local files
+
+        Returns:
+            FileTransferResult with success status, message, and transfer metadata
+
+        Raises:
+            FileValidationError: If path validation fails
+            SFTPError: If SFTP operation fails
+        """
+        _log.debug(f"Raw download requested: {remote_path} -> {local_path}")
+        return self.sftp_manager.download_file(remote_path, local_path, overwrite)
+
+    def upload_file_raw(
+        self,
+        local_path: str,
+        remote_path: str,
+        permissions: int | None = None,
+        overwrite: bool = False,
+    ) -> FileTransferResult:
+        """Upload file to remote server and return raw result.
+
+        This method is intended for plugin services that need to process
+        transfer results programmatically. For user-facing operations,
+        use upload_file() which provides formatted output.
+
+        Args:
+            local_path: Local file path to upload
+            remote_path: Destination path on remote server
+            permissions: File permissions in octal notation (e.g., 644, 755)
+            overwrite: Whether to overwrite existing remote files
+
+        Returns:
+            FileTransferResult with success status, message, and transfer metadata
+
+        Raises:
+            FileValidationError: If path validation or size check fails
+            SFTPError: If SFTP operation fails
+        """
+        _log.debug(f"Raw upload requested: {local_path} -> {remote_path}")
+        return self.sftp_manager.upload_file(
+            local_path, remote_path, permissions, overwrite
+        )
+
     def _add_transfer_metadata(
         self,
         result: FileTransferResult,

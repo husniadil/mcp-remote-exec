@@ -27,7 +27,7 @@ from mcp_remote_exec.plugins.imagekit.models import (
     TransferConfirmResult,
 )
 from mcp_remote_exec.services.command_service import CommandService
-from mcp_remote_exec.data_access.sftp_manager import SFTPManager
+from mcp_remote_exec.services.file_transfer_service import FileTransferService
 from mcp_remote_exec.data_access.path_validator import PathValidator
 
 _log = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class ImageKitService:
         self,
         config: ImageKitConfig,
         command_service: CommandService,
-        sftp_manager: SFTPManager,
+        file_service: FileTransferService,
         enabled_plugins: set[str] | None = None,
     ):
         """
@@ -49,12 +49,12 @@ class ImageKitService:
         Args:
             config: ImageKit configuration
             command_service: Command service for SSH operations
-            sftp_manager: SFTP manager for file transfers between MCP server and SSH host
+            file_service: File transfer service for SFTP operations between MCP server and SSH host
             enabled_plugins: Set of enabled plugin names for cross-plugin coordination
         """
         self.config = config
         self.command_service = command_service
-        self.sftp_manager = sftp_manager
+        self.file_service = file_service
         self.enabled_plugins = enabled_plugins or set()
         self.client = ImageKitClient(config)
         self.transfer_manager = TransferManager(timeout_seconds=config.transfer_timeout)
@@ -243,7 +243,7 @@ class ImageKitService:
                 # Upload from MCP server to host temp location via SFTP
                 # Path is on remote SSH server, not local system
                 host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"  # nosec B108
-                upload_result = self.sftp_manager.upload_file(
+                upload_result = self.file_service.upload_file_raw(
                     local_path=local_temp_path,
                     remote_path=host_temp_path,
                     permissions=None,
@@ -301,7 +301,7 @@ class ImageKitService:
                 _log.info(f"Uploading to host: {transfer.remote_path}")
 
                 # Upload from MCP server to host via SFTP
-                upload_result = self.sftp_manager.upload_file(
+                upload_result = self.file_service.upload_file_raw(
                     local_path=local_temp_path,
                     remote_path=transfer.remote_path,
                     permissions=transfer.permissions,
@@ -455,7 +455,7 @@ class ImageKitService:
                 local_temp_path = tmp_file.name
 
             # Use SFTP to download file from remote host to MCP server
-            download_result = self.sftp_manager.download_file(
+            download_result = self.file_service.download_file_raw(
                 remote_path=download_path, local_path=local_temp_path, overwrite=True
             )
 
