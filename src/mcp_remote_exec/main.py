@@ -28,18 +28,15 @@ def run_stdio_mode() -> None:
     """
     Run MCP server in stdio mode.
 
-    Initializes services, loads plugins, and starts the MCP server.
+    Services are automatically initialized when mcp_tools module is imported
+    (via bootstrap.initialize() call). This function just starts the MCP server.
     Handles graceful shutdown on keyboard interrupt.
 
     Raises:
         SystemExit: On configuration errors or exceptions
     """
     try:
-        # Eagerly initialize services to log activated plugins
-        from mcp_remote_exec.presentation.mcp_tools import get_services
-
-        get_services()
-
+        # Services already initialized via bootstrap.initialize() in mcp_tools module
         # Start MCP server
         mcp.run()
     except KeyboardInterrupt:

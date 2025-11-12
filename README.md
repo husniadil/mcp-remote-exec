@@ -19,12 +19,27 @@ By using this software, you acknowledge that:
 
 ## Architecture
 
-This MCP server is built with a clean 4-layer architecture (bottom-up):
+This MCP server follows Clean/Hexagonal Architecture principles with a clear separation of concerns:
+
+### Core Layers (Unidirectional Dependencies)
+The application has strict layering where each layer only depends on layers below it:
 
 - **Layer 1: Configuration** - SSH host setup, security settings, configuration management
 - **Layer 2: Data Access** - SSH connections, SFTP operations, domain exceptions
-- **Layer 3: Services** - Business logic, validation, output formatting
+- **Layer 3: Services** - Business logic, validation, output formatting, data access wrappers
 - **Layer 4: Presentation** - FastMCP tools, input models, AI interface
+
+### Composition Root
+- **Bootstrap Module** (`presentation/bootstrap.py`) - Central initialization point that knows about all layers and wires dependencies together. This is the only module that imports from all layers, maintaining proper separation of concerns throughout the rest of the codebase.
+
+### Extensions
+- **Plugin System** - Optional functionality that extends core capabilities (e.g., Proxmox container management, ImageKit file transfers). Plugins follow the same layering rules, accessing functionality through the services layer.
+
+### Dependency Rules
+- Presentation → Services → Data Access → Configuration (unidirectional, no upward dependencies)
+- Services layer provides wrappers for data access operations to maintain layer separation
+- Bootstrap module handles all cross-layer initialization
+- Plugins integrate through dependency injection via the ServiceContainer
 
 ## Features
 
@@ -378,23 +393,43 @@ uv run mcp-remote-exec
 ```
 src/mcp_remote_exec/
 ├── main.py                    # CLI entry point
-├── config/                    # Configuration layer
+├── config/                    # Layer 1: Configuration
 │   ├── __init__.py
-│   └── ssh_config.py
-├── data_access/               # SSH/SFTP operations
-│   ├── __init__.py
+│   ├── constants.py           # Core application constants
 │   ├── exceptions.py
+│   └── ssh_config.py
+├── data_access/               # Layer 2: Data Access
+│   ├── __init__.py
+│   ├── exceptions.py          # Domain-specific exceptions
+│   ├── path_validator.py
 │   ├── ssh_connection_manager.py
 │   └── sftp_manager.py
-├── services/                  # Business logic
+├── services/                  # Layer 3: Services
 │   ├── __init__.py
 │   ├── command_service.py
-│   ├── file_transfer_service.py
+│   ├── file_transfer_service.py  # Includes path validation wrapper
 │   └── output_formatter.py
-└── presentation/              # FastMCP tools
-    ├── __init__.py
-    ├── mcp_tools.py
-    └── models.py
+├── presentation/              # Layer 4: Presentation
+│   ├── __init__.py
+│   ├── bootstrap.py           # Composition root (knows all layers)
+│   ├── mcp_tools.py           # Core MCP tools
+│   ├── models.py              # Input validation models
+│   ├── service_container.py   # Dependency injection container
+│   └── validators.py
+└── plugins/                   # Extensions
+    ├── base.py                # Plugin interface
+    ├── registry.py            # Plugin discovery and registration
+    ├── imagekit/              # ImageKit file transfer plugin
+    │   ├── config.py
+    │   ├── models.py
+    │   ├── service.py
+    │   └── tools.py
+    └── proxmox/               # Proxmox container management plugin
+        ├── config.py          # Plugin configuration
+        ├── constants.py       # Plugin-specific constants
+        ├── models.py
+        ├── service.py
+        └── tools.py
 ```
 
 ## Security Best Practices

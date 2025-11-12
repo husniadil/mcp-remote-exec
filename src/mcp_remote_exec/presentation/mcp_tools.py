@@ -2,6 +2,10 @@
 MCP Tools for SSH MCP Remote Exec
 
 Provides tools for SSH command execution and file transfers.
+
+This module defines the MCP tools (presentation layer) and delegates initialization
+to the bootstrap module (composition root). It only imports from the services and
+presentation layers, maintaining proper architectural separation.
 """
 
 import logging
@@ -9,105 +13,13 @@ from typing import Annotated
 
 from fastmcp import FastMCP
 
-from mcp_remote_exec.config.exceptions import ConfigError
-from mcp_remote_exec.config.ssh_config import SSHConfig
-from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
-from mcp_remote_exec.data_access.sftp_manager import SFTPManager
-from mcp_remote_exec.services.command_service import CommandService
-from mcp_remote_exec.services.file_transfer_service import FileTransferService
-from mcp_remote_exec.services.output_formatter import OutputFormatter
-from mcp_remote_exec.presentation.service_container import ServiceContainer
+from mcp_remote_exec.presentation import bootstrap
 from mcp_remote_exec.presentation.models import (
     ResponseFormat,
     SSHExecCommandInput,
-    SSHUploadFileInput,
-    SSHDownloadFileInput,
 )
 
 _log = logging.getLogger(__name__)
-
-# Global application context for tool access
-_app_context: ServiceContainer | None = None
-
-
-def _initialize_services() -> ServiceContainer:
-    """Initialize services on first use"""
-    global _app_context
-    if _app_context is not None:
-        return _app_context
-
-    _log.info("Initializing SSH MCP Remote Exec...")
-
-    # Load configuration
-    config = SSHConfig()
-
-    # Validate configuration
-    _, error = config.validate()
-    if error:
-        _log.error(f"Configuration validation failed: {error}")
-        raise ConfigError(error)
-
-    _log.info(f"Configuration validated. Host: {config.get_host().name}")
-
-    # Initialize Data Access Layer
-    connection_manager = SSHConnectionManager(config)
-    sftp_manager = SFTPManager(connection_manager)
-
-    # Initialize Service Layer
-    command_service = CommandService(connection_manager, config)
-    file_service = FileTransferService(sftp_manager, config)
-    output_formatter = OutputFormatter(config)
-
-    # Store in application context
-    _app_context = ServiceContainer(
-        config=config,
-        connection_manager=connection_manager,
-        sftp_manager=sftp_manager,
-        command_service=command_service,
-        file_service=file_service,
-        output_formatter=output_formatter,
-    )
-
-    # Initialize and register plugins
-    from mcp_remote_exec.plugins.registry import PluginRegistry
-
-    plugin_registry = PluginRegistry()
-    activated_plugins = plugin_registry.discover_and_register(mcp, _app_context)
-
-    # Store activated plugins in context for later reference
-    _app_context.plugin_services["_activated_plugins"] = activated_plugins
-
-    # Register SSH file transfer tools conditionally
-    # If ImageKit plugin is enabled, skip SSH file transfer tools
-    imagekit_enabled = "imagekit" in _app_context.enabled_plugins
-    if imagekit_enabled:
-        _log.warning(
-            "SSH file transfer tools (ssh_upload_file, ssh_download_file) NOT registered - "
-            "ImageKit plugin provides alternative file transfer interface"
-        )
-    else:
-        _log.info(
-            "Registering SSH file transfer tools (ssh_upload_file, ssh_download_file)"
-        )
-        _register_ssh_file_transfer_tools()
-
-    _log.info("SSH MCP Remote Exec ready!")
-
-    if activated_plugins:
-        _log.info(f"Activated plugins: {', '.join(activated_plugins)}")
-    else:
-        _log.info("No plugins activated")
-
-    return _app_context
-
-
-def get_services() -> ServiceContainer:
-    """Get service instances from global application context"""
-    global _app_context
-    if _app_context is None:
-        return _initialize_services()
-    return _app_context
-
 
 # Create FastMCP server (stdio mode, no app_lifespan)
 mcp = FastMCP("mcp_remote_exec")
@@ -154,9 +66,10 @@ async def ssh_exec_command(
             response_format=ResponseFormat(response_format.lower()),
         )
 
-        services = get_services()
+        # Get services from bootstrap module
+        container = bootstrap.get_container()
 
-        result = services.command_service.execute_command(
+        result = container.command_service.execute_command(
             command=input_data.command,
             timeout=input_data.timeout,
             response_format=input_data.response_format.value,
@@ -165,136 +78,22 @@ async def ssh_exec_command(
         return result
 
     except ValueError as e:
-        services = get_services()
-        return services.output_formatter.format_error_result(
+        container = bootstrap.get_container()
+        return container.output_formatter.format_error_result(
             f"Input validation error: {str(e)}"
         ).content
     except Exception as e:
-        services = get_services()
-        return services.output_formatter.format_error_result(
+        container = bootstrap.get_container()
+        return container.output_formatter.format_error_result(
             f"Unexpected error: {str(e)}"
         ).content
 
 
-def _register_ssh_file_transfer_tools() -> None:
-    """Register SSH file transfer tools (upload/download)"""
+# ============================================================================
+# Application Initialization
+# ============================================================================
 
-    @mcp.tool(name="ssh_upload_file")
-    async def ssh_upload_file(
-        local_path: Annotated[
-            str, "Local file path to upload - absolute or relative (required)"
-        ] = "",
-        remote_path: Annotated[
-            str, "Remote destination path on your SSH server (required)"
-        ] = "",
-        permissions: Annotated[
-            int | None,
-            "File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional.",
-        ] = None,
-        overwrite: Annotated[
-            bool, "Overwrite existing remote files (default: False)"
-        ] = False,
-    ) -> str:
-        """Upload a file to your remote SSH server via SFTP.
-
-        Use this tool to transfer files to your configured server for:
-        - Deploying configuration files (nginx.conf, app.conf)
-        - Uploading scripts (install.sh, backup.sh)
-        - Transferring data files (backups, logs)
-        - Installing software packages
-
-        Args:
-            local_path: Local file path to upload - absolute or relative (required)
-            remote_path: Remote destination path on your SSH server (required)
-            permissions: File permissions as octal value. Specify as decimal int representing octal notation (e.g., 644 for 0o644/rw-r--r--, 755 for 0o755/rwxr-xr-x). Optional, defaults to server's umask.
-            overwrite: Overwrite existing files (default: False, will fail if file exists)
-
-        Returns:
-            Transfer result with metadata (bytes transferred, speed, etc.)
-        """
-        try:
-            # Validate input
-            input_data = SSHUploadFileInput(
-                local_path=local_path,
-                remote_path=remote_path,
-                permissions=permissions,
-                overwrite=overwrite,
-            )
-
-            services = get_services()
-
-            result = services.file_service.upload_file(
-                local_path=input_data.local_path,
-                remote_path=input_data.remote_path,
-                permissions=input_data.permissions,
-                overwrite=input_data.overwrite,
-            )
-
-            return result
-
-        except ValueError as e:
-            services = get_services()
-            return services.output_formatter.format_error_result(
-                f"Input validation error: {str(e)}"
-            ).content
-        except Exception as e:
-            services = get_services()
-            return services.output_formatter.format_error_result(
-                f"Unexpected error: {str(e)}"
-            ).content
-
-    @mcp.tool(name="ssh_download_file")
-    async def ssh_download_file(
-        remote_path: Annotated[
-            str, "Remote file path on your SSH server to download (required)"
-        ] = "",
-        local_path: Annotated[
-            str, "Local destination file path - absolute or relative (required)"
-        ] = "",
-        overwrite: Annotated[
-            bool,
-            "Overwrite existing local files (default: False, will fail if file exists)",
-        ] = False,
-    ) -> str:
-        """Download a file from your remote SSH server via SFTP.
-
-        Use this tool to transfer files from your configured server:
-        - Download log files (/var/log/app.log, /var/log/nginx/access.log)
-        - Retrieving configuration files (/etc/nginx/nginx.conf, /etc/hosts)
-        - Getting data files (database exports, backups)
-        - Collecting system information (/proc/cpuinfo)
-
-        Args:
-            remote_path: Remote file path on your SSH server to download (required)
-            local_path: Local destination path - absolute or relative (required)
-            overwrite: Overwrite existing local files (default: False, will fail if file exists)
-
-        Returns:
-            Transfer result with metadata (bytes transferred, speed, etc.)
-        """
-        try:
-            # Validate input
-            input_data = SSHDownloadFileInput(
-                remote_path=remote_path, local_path=local_path, overwrite=overwrite
-            )
-
-            services = get_services()
-
-            result = services.file_service.download_file(
-                remote_path=input_data.remote_path,
-                local_path=input_data.local_path,
-                overwrite=input_data.overwrite,
-            )
-
-            return result
-
-        except ValueError as e:
-            services = get_services()
-            return services.output_formatter.format_error_result(
-                f"Input validation error: {str(e)}"
-            ).content
-        except Exception as e:
-            services = get_services()
-            return services.output_formatter.format_error_result(
-                f"Unexpected error: {str(e)}"
-            ).content
+# Initialize application on module load
+# This call to bootstrap.initialize() is the composition root where all layers
+# are wired together. It returns a ServiceContainer with all dependencies.
+bootstrap.initialize(mcp)

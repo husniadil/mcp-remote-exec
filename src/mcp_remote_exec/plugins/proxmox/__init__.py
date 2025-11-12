@@ -5,11 +5,11 @@ Provides container management tools for Proxmox VE.
 """
 
 import logging
-import os
 
 from fastmcp import FastMCP
 
 from mcp_remote_exec.plugins.base import BasePlugin
+from mcp_remote_exec.plugins.proxmox.config import ProxmoxConfig
 from mcp_remote_exec.plugins.proxmox.service import ProxmoxService
 from mcp_remote_exec.presentation.service_container import ServiceContainer
 
@@ -24,16 +24,17 @@ class ProxmoxPlugin(BasePlugin):
         return "proxmox"
 
     def is_enabled(self, container: ServiceContainer) -> bool:
-        """Check if Proxmox plugin is enabled via ENABLE_PROXMOX env var
+        """Check if Proxmox plugin is enabled via configuration
 
-        Uses a simple enablement pattern since Proxmox requires no additional
+        Uses ProxmoxConfig.from_env() to check enablement. Returns True if
+        ENABLE_PROXMOX=true, False otherwise. Proxmox requires no additional
         configuration beyond the SSH connection (which is validated by SSHConfig).
-        This is simpler than ImageKitPlugin which requires additional credentials.
         """
-        enabled = os.getenv("ENABLE_PROXMOX", "false").lower() == "true"
-        if enabled:
+        config = ProxmoxConfig.from_env()
+        if config is not None:
             _log.info("Proxmox plugin enabled")
-        return enabled
+            return True
+        return False
 
     def register_tools(self, mcp: FastMCP, container: ServiceContainer) -> None:
         """Register Proxmox container management tools"""

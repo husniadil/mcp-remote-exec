@@ -1,12 +1,9 @@
 """
 Constants for SSH MCP Remote Exec
 
-Centralized constants for the entire application including SSH configuration,
-output formatting, file operations, and validation messages.
+Centralized constants for the core application including SSH configuration,
+output formatting, and file operations.
 """
-
-import os
-import tempfile
 
 # =============================================================================
 # SSH Configuration Constants
@@ -38,13 +35,6 @@ MIN_OUTPUT_SPACE = 1000
 """Minimum space allocated for output content after truncation"""
 
 # =============================================================================
-# Temporary File Constants
-# =============================================================================
-
-TEMP_FILE_PREFIX = os.path.join(tempfile.gettempdir(), "mcp-remote-exec")
-"""Prefix for temporary files created during file transfer operations"""
-
-# =============================================================================
 # Transfer Timeouts
 # =============================================================================
 
@@ -52,11 +42,8 @@ DEFAULT_TRANSFER_TIMEOUT_SECONDS = 3600
 """Default timeout for file transfer operations (1 hour)"""
 
 # =============================================================================
-# Error Messages
+# Path Validation Messages
 # =============================================================================
 
 MSG_PATH_TRAVERSAL_ERROR = "Path cannot contain '..' (path traversal not allowed)"
 """Error message for path traversal attempts"""
-
-MSG_CONTAINER_NOT_FOUND = "Use proxmox_list_containers to see available containers"
-"""Suggestion message when container is not found"""

@@ -9,6 +9,7 @@ from datetime import datetime
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager, FileTransferResult
+from mcp_remote_exec.data_access.path_validator import PathValidator
 from mcp_remote_exec.services.output_formatter import OutputFormatter
 
 _log = logging.getLogger(__name__)
@@ -151,6 +152,24 @@ class FileTransferService:
         return self.sftp_manager.upload_file(
             local_path, remote_path, permissions, overwrite
         )
+
+    def validate_paths(self, *paths: str) -> tuple[bool, str | None]:
+        """
+        Validate multiple paths for directory traversal attempts.
+
+        This service method provides plugins with a way to validate paths
+        without directly accessing the data access layer. It wraps the
+        PathValidator functionality while maintaining proper layer separation.
+
+        Args:
+            *paths: Variable number of paths to check
+
+        Returns:
+            Tuple of (is_valid, error_message)
+            - is_valid: True if all paths are safe, False otherwise
+            - error_message: None if valid, error description if invalid
+        """
+        return PathValidator.check_paths_for_traversal(*paths)
 
     def _add_transfer_metadata(
         self,
