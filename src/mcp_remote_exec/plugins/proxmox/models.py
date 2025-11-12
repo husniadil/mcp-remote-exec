@@ -7,10 +7,8 @@ Input validation for Proxmox container operations.
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from mcp_remote_exec.common.enums import ResponseFormat
-from mcp_remote_exec.common.validators import (
-    validate_octal_permissions as validate_permissions,
-)
-from mcp_remote_exec.config.constants import MAX_TIMEOUT
+from mcp_remote_exec.common.constants import MAX_TIMEOUT
+from mcp_remote_exec.common.validators import pydantic_permissions_field_validator
 
 
 class ProxmoxContainerExecInput(BaseModel):
@@ -143,8 +141,7 @@ class ProxmoxUploadFileInput(BaseModel):
         description="Whether to overwrite container file if it exists (default: False)",
     )
 
-    @field_validator("permissions")
-    @classmethod
-    def validate_octal_permissions(cls, v: int | None) -> int | None:
-        """Validate that permissions value contains only octal digits (0-7)"""
-        return validate_permissions(v)
+    # Reusable permissions validator from common layer
+    validate_permissions = field_validator("permissions")(
+        pydantic_permissions_field_validator
+    )

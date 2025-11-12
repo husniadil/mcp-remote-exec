@@ -6,9 +6,7 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from mcp_remote_exec.common.validators import (
-    validate_octal_permissions as validate_permissions,
-)
+from mcp_remote_exec.common.validators import pydantic_permissions_field_validator
 
 
 class TransferOperation(str, Enum):
@@ -90,11 +88,10 @@ class ImageKitRequestUploadInput(BaseModel):
         None, ge=100, le=999999999
     )  # Optional Proxmox container ID
 
-    @field_validator("permissions")
-    @classmethod
-    def validate_octal_permissions(cls, v: int | None) -> int | None:
-        """Validate that permissions value contains only octal digits (0-7)"""
-        return validate_permissions(v)
+    # Reusable permissions validator from common layer
+    validate_permissions = field_validator("permissions")(
+        pydantic_permissions_field_validator
+    )
 
 
 class ImageKitConfirmUploadInput(BaseModel):
