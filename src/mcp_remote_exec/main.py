@@ -14,11 +14,11 @@ import sys
 import logging
 from dotenv import load_dotenv
 
+# Load environment variables from .env file BEFORE any imports that use config
+load_dotenv()
+
 from mcp_remote_exec import __version__
 from mcp_remote_exec.presentation.mcp_tools import mcp
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
