@@ -6,7 +6,6 @@ output formatting, and file operations.
 """
 
 # Import validation constants from common layer
-from mcp_remote_exec.common.constants import MAX_TIMEOUT
 
 # =============================================================================
 # SSH Configuration Constants

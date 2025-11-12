@@ -35,6 +35,7 @@ from mcp_remote_exec.plugins.imagekit.models import (
 )
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.services.file_transfer_service import FileTransferService
+from mcp_remote_exec.services.file_utils import cleanup_temp_file
 
 _log = logging.getLogger(__name__)
 
@@ -276,9 +277,7 @@ class ImageKitService:
                 if push_result.exit_code != 0:
                     # Cleanup
                     os.unlink(local_temp_path)
-                    self.command_service.execute_command_raw(
-                        f"rm -f {host_temp_path}", 5
-                    )
+                    cleanup_temp_file(self.command_service, host_temp_path)
                     self.transfer_manager.complete_transfer(transfer_id)
                     return json.dumps(
                         {
@@ -299,7 +298,7 @@ class ImageKitService:
 
                 # Cleanup temp files
                 os.unlink(local_temp_path)
-                self.command_service.execute_command_raw(f"rm -f {host_temp_path}", 5)
+                cleanup_temp_file(self.command_service, host_temp_path)
 
                 message = f"Successfully uploaded to container {transfer.ctid}: {transfer.remote_path}"
             else:
@@ -469,9 +468,7 @@ class ImageKitService:
                 os.unlink(local_temp_path)
                 # Clean up host temp file if we created one
                 if host_temp_path:
-                    self.command_service.execute_command_raw(
-                        f"rm -f {host_temp_path}", 5
-                    )
+                    cleanup_temp_file(self.command_service, host_temp_path)
                 self.transfer_manager.complete_transfer(transfer.transfer_id)
                 return json.dumps(
                     {
@@ -483,7 +480,7 @@ class ImageKitService:
 
             # Clean up host temp file if we created one
             if host_temp_path:
-                self.command_service.execute_command_raw(f"rm -f {host_temp_path}", 5)
+                cleanup_temp_file(self.command_service, host_temp_path)
 
             # Upload to ImageKit from MCP server
             file_name = f"mcp-download-{transfer.transfer_id}"

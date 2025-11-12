@@ -16,6 +16,7 @@ from mcp_remote_exec.plugins.proxmox.constants import (
 )
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.services.file_transfer_service import FileTransferService
+from mcp_remote_exec.services.file_utils import cleanup_temp_file
 
 _log = logging.getLogger(__name__)
 
@@ -270,7 +271,7 @@ class ProxmoxService:
 
             # Check if pull succeeded
             if "[ERROR]" in pull_result or "failed" in pull_result.lower():
-                self._cleanup_temp_file(temp_path)
+                cleanup_temp_file(self.command_service, temp_path)
                 return json.dumps(
                     {
                         "success": False,
@@ -286,7 +287,7 @@ class ProxmoxService:
             )
 
             # Cleanup temp file
-            self._cleanup_temp_file(temp_path)
+            cleanup_temp_file(self.command_service, temp_path)
 
             # Check download result
             if "[ERROR]" in download_result:
@@ -308,7 +309,7 @@ class ProxmoxService:
             )
 
         except Exception as e:
-            self._cleanup_temp_file(temp_path)
+            cleanup_temp_file(self.command_service, temp_path)
             return json.dumps(
                 {"success": False, "error": str(e)},
                 indent=2,
@@ -387,7 +388,7 @@ class ProxmoxService:
             )
 
             if "[ERROR]" in upload_result:
-                self._cleanup_temp_file(temp_path)
+                cleanup_temp_file(self.command_service, temp_path)
                 return upload_result
 
             # Push file from host to container
@@ -395,7 +396,7 @@ class ProxmoxService:
             push_result = self.command_service.execute_command(push_command, 30, "text")
 
             if "[ERROR]" in push_result or "failed" in push_result.lower():
-                self._cleanup_temp_file(temp_path)
+                cleanup_temp_file(self.command_service, temp_path)
                 return json.dumps(
                     {
                         "success": False,
@@ -413,7 +414,7 @@ class ProxmoxService:
                 self.command_service.execute_command(chmod_command, 30, "text")
 
             # Cleanup temp file
-            self._cleanup_temp_file(temp_path)
+            cleanup_temp_file(self.command_service, temp_path)
 
             # Get file size
             file_size = os.path.getsize(local_path)
@@ -432,19 +433,11 @@ class ProxmoxService:
             )
 
         except Exception as e:
-            self._cleanup_temp_file(temp_path)
+            cleanup_temp_file(self.command_service, temp_path)
             return json.dumps(
                 {"success": False, "error": str(e)},
                 indent=2,
             )
-
-    def _cleanup_temp_file(self, temp_path: str) -> None:
-        """Remove temporary file on Proxmox host"""
-        try:
-            self.command_service.execute_command(f"rm -f {temp_path}", 5, "text")
-        except Exception:  # nosec B110
-            # Ignore cleanup errors - best effort temp file removal
-            pass
 
     def _extract_stdout(self, result: str) -> str:
         """
