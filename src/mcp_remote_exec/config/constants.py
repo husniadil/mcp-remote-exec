@@ -5,9 +5,6 @@ Centralized constants for the core application including SSH configuration,
 output formatting, and file operations.
 """
 
-# Import validation constants from common layer
-from mcp_remote_exec.common.constants import MAX_TIMEOUT
-
 # =============================================================================
 # SSH Configuration Constants
 # =============================================================================
@@ -20,9 +17,6 @@ DEFAULT_MAX_FILE_SIZE = 10485760  # 10MB
 
 DEFAULT_TIMEOUT = 30
 """Default timeout for SSH operations in seconds"""
-
-# MAX_TIMEOUT is imported from common.constants and re-exported here
-# for backward compatibility with existing imports
 
 DEFAULT_SSH_PORT = 22
 """Default SSH port number"""
@@ -56,8 +50,6 @@ MSG_PATH_TRAVERSAL_ERROR = "Path cannot contain '..' (path traversal not allowed
 # =============================================================================
 
 __all__ = [
-    # Imported and re-exported from common layer
-    "MAX_TIMEOUT",
     # SSH Configuration
     "DEFAULT_CHARACTER_LIMIT",
     "DEFAULT_MAX_FILE_SIZE",

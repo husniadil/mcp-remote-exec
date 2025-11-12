@@ -53,6 +53,12 @@ uv run task test-cov     # Run tests with coverage report
 
 **Current Status:** 290 tests, 61% overall coverage
 
+### Common Layer (100% coverage)
+
+- ✅ Validators - permission validation, input constraints
+- ✅ Enums - response format types
+- ✅ Constants - validation constraints
+
 ### Config Layer (100% coverage)
 
 - ✅ `HostConfig` dataclass - authentication methods, configuration validation
@@ -97,7 +103,6 @@ uv run task test-cov     # Run tests with coverage report
 
 - ✅ Models (100% coverage) - all input validation models
 - ✅ Service Container (100% coverage) - dependency injection
-- ✅ Validators (100% coverage) - permission validation
 - ✅ Bootstrap (71% coverage) - initialization and wiring
 
 #### Needs Improvement:

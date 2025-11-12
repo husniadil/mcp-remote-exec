@@ -406,6 +406,7 @@ src/mcp_remote_exec/
 ├── main.py                    # CLI entry point
 ├── common/                    # Layer 0: Common
 │   ├── __init__.py
+│   ├── constants.py           # Shared validation constraints
 │   ├── enums.py               # Shared enumerations
 │   └── validators.py          # Shared validators
 ├── config/                    # Layer 1: Configuration
@@ -423,14 +424,14 @@ src/mcp_remote_exec/
 │   ├── __init__.py
 │   ├── command_service.py
 │   ├── file_transfer_service.py  # Includes path validation wrapper
+│   ├── file_utils.py          # Shared file operation utilities
 │   └── output_formatter.py
 ├── presentation/              # Layer 4: Presentation
 │   ├── __init__.py
 │   ├── bootstrap.py           # Composition root (knows all layers)
 │   ├── mcp_tools.py           # Core MCP tools
 │   ├── models.py              # Input validation models
-│   ├── service_container.py   # Dependency injection container
-│   └── validators.py          # Re-exports from common (backward compat)
+│   └── service_container.py   # Dependency injection container
 └── plugins/                   # Extensions
     ├── base.py                # Plugin interface
     ├── registry.py            # Plugin discovery and registration

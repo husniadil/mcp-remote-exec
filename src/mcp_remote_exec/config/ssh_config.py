@@ -18,12 +18,12 @@ Configuration Pattern:
 import os
 from dataclasses import dataclass
 
+from mcp_remote_exec.common.constants import MAX_TIMEOUT
 from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.constants import (
     DEFAULT_CHARACTER_LIMIT,
     DEFAULT_MAX_FILE_SIZE,
     DEFAULT_TIMEOUT,
-    MAX_TIMEOUT,
     DEFAULT_SSH_PORT,
 )
 

@@ -4,13 +4,13 @@ import os
 import pytest
 from unittest.mock import patch
 
+from mcp_remote_exec.common.constants import MAX_TIMEOUT
 from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.ssh_config import SSHConfig, HostConfig, SecurityConfig
 from mcp_remote_exec.config.constants import (
     DEFAULT_CHARACTER_LIMIT,
     DEFAULT_MAX_FILE_SIZE,
     DEFAULT_TIMEOUT,
-    MAX_TIMEOUT,
     DEFAULT_SSH_PORT,
 )
 
