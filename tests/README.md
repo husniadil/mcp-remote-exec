@@ -63,6 +63,7 @@ uv run task test-cov     # Run tests with coverage report
 ### Data Access Layer
 
 #### High Coverage (95%+):
+
 - ✅ `SSHConnectionManager` (98% coverage) - 32 comprehensive tests
   - SSH key loading (RSA, Ed25519, ECDSA)
   - Connection creation and management
@@ -74,34 +75,40 @@ uv run task test-cov     # Run tests with coverage report
 - ✅ Exceptions (100% coverage) - all exception types
 
 #### Needs Improvement:
+
 - ⚠️ `SFTPManager` (22% coverage) - basic tests only, needs upload/download testing
 
 ### Services Layer
 
 #### High Coverage:
+
 - ✅ `OutputFormatter` (98% coverage) - text/JSON formatting, truncation, error handling
 - ✅ Command output formatting - success/failure/timeout scenarios
 - ✅ File transfer result formatting - upload/download operations
 
 #### Moderate Coverage:
+
 - ⚠️ `CommandService` (38% coverage) - basic delegation tests, needs integration tests
 - ⚠️ `FileTransferService` (29% coverage) - basic delegation tests, needs integration tests
 
 ### Presentation Layer
 
 #### High Coverage:
+
 - ✅ Models (100% coverage) - all input validation models
 - ✅ Service Container (100% coverage) - dependency injection
 - ✅ Validators (100% coverage) - permission validation
 - ✅ Bootstrap (71% coverage) - initialization and wiring
 
 #### Needs Improvement:
+
 - ⚠️ MCP Tools (0% coverage) - tool registration not tested
 - ❌ Main CLI (0% coverage) - entry point not tested (less critical)
 
 ### Plugin System
 
 #### High Coverage:
+
 - ✅ All plugin configs (100% coverage)
 - ✅ All plugin models (100% coverage)
 - ✅ All plugin constants (100% coverage)
@@ -109,6 +116,7 @@ uv run task test-cov     # Run tests with coverage report
 - ✅ Plugin base interface (79% coverage)
 
 #### Moderate Coverage:
+
 - ⚠️ Proxmox service (46% coverage) - core functionality tested
 - ⚠️ ImageKit service (43% coverage) - core functionality tested
 - ⚠️ ImageKit client (37% coverage) - basic operations tested
@@ -116,6 +124,7 @@ uv run task test-cov     # Run tests with coverage report
 - ⚠️ Registry (23% coverage) - basic registration tested
 
 #### Needs Improvement:
+
 - ⚠️ ImageKit tools (16% coverage) - tool registration needs more tests
 
 ## Test Fixtures
@@ -154,23 +163,27 @@ def test_ssh_config_initialization(mock_env_minimal):
 Priority areas for additional test coverage:
 
 ### High Priority
+
 - **SFTP Manager** (22% → 80%+) - Add upload/download operation tests with paramiko mocking
 - **Command Service** (38% → 80%+) - Add integration tests with SSH connection manager
 - **File Transfer Service** (29% → 80%+) - Add integration tests with SFTP manager
 - **Plugin Registry** (23% → 80%+) - Add plugin coordination and conflict tests
 
 ### Medium Priority
+
 - **MCP Tools** (0% → 50%+) - Add tool registration and error handling tests
 - **ImageKit Tools** (16% → 60%+) - Add two-phase transfer workflow tests
 - **Proxmox Tools** (38% → 60%+) - Add container operation tests
 - **Bootstrap** (71% → 90%+) - Add conditional tool registration edge cases
 
 ### Low Priority
+
 - **ImageKit/Proxmox Services** (43%/46% → 70%+) - Add edge case and error scenario tests
 - **ImageKit Client** (37% → 70%+) - Add ImageKit API interaction tests
 - **Main CLI** (0% → 40%+) - Add CLI argument parsing tests (less critical for MCP server)
 
 ### Completed ✅
+
 - ~~SSH connection management~~ - **DONE** (98% coverage, 32 comprehensive tests)
 - ~~Path validation~~ - **DONE** (100% coverage, removed deprecated code)
 

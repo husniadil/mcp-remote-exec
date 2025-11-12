@@ -18,7 +18,7 @@ from mcp_remote_exec.plugins.proxmox.models import (
     ProxmoxDownloadFileInput,
     ProxmoxUploadFileInput,
 )
-from mcp_remote_exec.presentation.models import ResponseFormat
+from mcp_remote_exec.common.enums import ResponseFormat
 
 _log = logging.getLogger(__name__)
 

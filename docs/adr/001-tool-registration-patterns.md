@@ -7,6 +7,7 @@
 ## Context
 
 The application provides MCP tools through two different mechanisms:
+
 1. **Core tools**: Registered via direct `@mcp.tool` decoration at module level
 2. **Plugin tools**: Registered via `register_*_tools()` functions called conditionally
 
@@ -21,6 +22,7 @@ We use two distinct tool registration patterns:
 **Used for:** Essential, always-available tools that are part of core functionality
 
 **Implementation:**
+
 ```python
 # presentation/mcp_tools.py
 mcp = FastMCP("mcp_remote_exec")
@@ -39,6 +41,7 @@ def _register_ssh_file_transfer_tools(mcp_server: FastMCP) -> None:
 ```
 
 **Characteristics:**
+
 - Tools are decorated at module level or within private functions
 - Registration happens during module import or bootstrap initialization
 - Tools are always registered (or conditionally via explicit if/else logic)
@@ -49,6 +52,7 @@ def _register_ssh_file_transfer_tools(mcp_server: FastMCP) -> None:
 **Used for:** Optional, plugin-provided tools that may or may not be available
 
 **Implementation:**
+
 ```python
 # plugins/proxmox/tools.py
 def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
@@ -60,6 +64,7 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
 ```
 
 **Characteristics:**
+
 - Tools are encapsulated in `register_*` functions
 - Registration is called conditionally based on plugin enablement
 - Allows dependency injection (container, mcp instance)
@@ -87,6 +92,7 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
 ### Conditional Core Tools
 
 Core file transfer tools (`ssh_upload_file`, `ssh_download_file`) use a hybrid approach:
+
 - Defined in a private function `_register_ssh_file_transfer_tools()`
 - Called conditionally based on ImageKit plugin status
 - This bridges the gap between static and dynamic registration
@@ -129,6 +135,7 @@ else:
 **Approach:** Make all tools (core and plugin) use `register_*()` functions
 
 **Rejected because:**
+
 - Adds unnecessary complexity for core tools
 - Requires boilerplate for simple, always-on tools
 - Goes against FastMCP's recommended simple patterns
@@ -139,6 +146,7 @@ else:
 **Approach:** Have plugins register tools at module level with conditional decorators
 
 **Rejected because:**
+
 - Makes cross-plugin coordination difficult
 - Harder to inject dependencies (services, container)
 - Conditional logic scattered across modules
@@ -155,6 +163,7 @@ else:
 ## Review
 
 This ADR should be reviewed if:
+
 - A third tool registration pattern is proposed
 - Plugin architecture changes significantly
 - FastMCP framework introduces new registration mechanisms
