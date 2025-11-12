@@ -35,18 +35,33 @@ class ImageKitConfig:
         """
         Create config from environment variables.
 
+        Standardized plugin configuration pattern:
+        - Checks if plugin is enabled via ENABLE_IMAGEKIT flag
+        - Validates all required credentials are present
+        - Returns None if plugin should not be activated (disabled or missing config)
+        - Returns validated config instance if all checks pass
+
         Returns:
-            ImageKitConfig if all required variables are set, None otherwise
+            ImageKitConfig if enabled and all required variables are set, None otherwise
         """
+        # Check if plugin is enabled first
+        if os.getenv("ENABLE_IMAGEKIT", "false").lower() != "true":
+            return None
+
+        # Get required credentials
         public_key = os.getenv("IMAGEKIT_PUBLIC_KEY")
         private_key = os.getenv("IMAGEKIT_PRIVATE_KEY")
         url_endpoint = os.getenv("IMAGEKIT_URL_ENDPOINT")
 
-        # Explicit None checks for type narrowing
+        # Validate all required credentials are present
         if public_key is None or private_key is None or url_endpoint is None:
             return None
 
-        # Type checker now knows these are str (not None)
+        # Validate credentials are not empty strings
+        if not public_key or not private_key or not url_endpoint:
+            return None
+
+        # Get optional settings
         transfer_timeout = int(
             os.getenv(
                 "IMAGEKIT_TRANSFER_TIMEOUT", str(DEFAULT_TRANSFER_TIMEOUT_SECONDS)
@@ -61,22 +76,3 @@ class ImageKitConfig:
             folder=folder,
             transfer_timeout=transfer_timeout,
         )
-
-    def is_enabled(self) -> bool:
-        """
-        Check if ImageKit plugin is enabled via environment variable.
-
-        Note: This assumes credentials are already validated (via from_env() or validate())
-        """
-        return os.getenv("ENABLE_IMAGEKIT", "false").lower() == "true"
-
-    def validate(self) -> tuple[bool, str | None]:
-        """Validate ImageKit configuration"""
-        if not self.public_key:
-            return False, "IMAGEKIT_PUBLIC_KEY not set"
-        if not self.private_key:
-            return False, "IMAGEKIT_PRIVATE_KEY not set"
-        if not self.url_endpoint:
-            return False, "IMAGEKIT_URL_ENDPOINT not set"
-
-        return True, None

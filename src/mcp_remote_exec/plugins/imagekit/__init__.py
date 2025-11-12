@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from mcp_remote_exec.plugins.base import BasePlugin
 from mcp_remote_exec.presentation.service_container import ServiceContainer
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig
+from mcp_remote_exec.plugins.imagekit.constants import MSG_CONFIG_NOT_FOUND
 from mcp_remote_exec.plugins.imagekit.service import ImageKitService
 from mcp_remote_exec.plugins.imagekit.tools import register_imagekit_tools
 
@@ -30,24 +31,21 @@ class ImageKitPlugin(BasePlugin):
     def is_enabled(self, container: ServiceContainer) -> bool:
         """Check if ImageKit plugin should be activated
 
-        Uses a standardized enablement pattern consistent with other plugins:
-        1. Check ENABLE_IMAGEKIT environment variable
-        2. Validate plugin-specific configuration (credentials)
+        Standardized plugin enablement pattern:
+        - Delegates to ImageKitConfig.from_env() which performs all validation
+        - from_env() returns None if plugin is disabled or misconfigured
+        - Caches config for use in register_tools()
+
+        Returns:
+            True if plugin should be activated, False otherwise
         """
         # Cache config to avoid redundant creation in register_tools()
         self._config = ImageKitConfig.from_env()
 
-        if not self._config:
-            _log.debug("ImageKit plugin disabled: credentials not configured")
-            return False
-
-        if not self._config.is_enabled():
-            _log.debug("ImageKit plugin disabled: ENABLE_IMAGEKIT not set to true")
-            return False
-
-        valid, error = self._config.validate()
-        if not valid:
-            _log.warning(f"ImageKit plugin disabled: {error}")
+        if self._config is None:
+            _log.debug(
+                "ImageKit plugin disabled: ENABLE_IMAGEKIT not true or credentials missing"
+            )
             return False
 
         _log.info("ImageKit plugin enabled")
@@ -57,7 +55,7 @@ class ImageKitPlugin(BasePlugin):
         """Register ImageKit tools and setup service"""
         # Use cached config from is_enabled() to avoid redundant creation
         if not self._config:
-            _log.error("ImageKit configuration not found")
+            _log.error(MSG_CONFIG_NOT_FOUND)
             return
 
         # Create ImageKit service

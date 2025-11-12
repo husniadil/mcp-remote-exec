@@ -18,6 +18,11 @@ import tempfile
 from typing import Any
 
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig
+from mcp_remote_exec.plugins.imagekit.constants import (
+    MSG_PROXMOX_REQUIRED,
+    MSG_PROXMOX_ENABLE_SUGGESTION,
+    MSG_TRANSFER_NOT_FOUND,
+)
 from mcp_remote_exec.plugins.imagekit.imagekit_client import ImageKitClient
 from mcp_remote_exec.plugins.imagekit.transfer_manager import TransferManager
 from mcp_remote_exec.plugins.imagekit.models import (
@@ -84,8 +89,8 @@ class ImageKitService:
                 return json.dumps(
                     {
                         "success": False,
-                        "error": "Container file transfers require Proxmox plugin to be enabled",
-                        "suggestion": "Set ENABLE_PROXMOX=true in your .env file to use container features (ctid parameter)",
+                        "error": MSG_PROXMOX_REQUIRED,
+                        "suggestion": MSG_PROXMOX_ENABLE_SUGGESTION,
                     },
                     indent=2,
                 )
@@ -186,7 +191,7 @@ class ImageKitService:
             return json.dumps(
                 {
                     "success": False,
-                    "error": f"Transfer {transfer_id} not found or expired",
+                    "error": MSG_TRANSFER_NOT_FOUND,
                 },
                 indent=2,
             )
@@ -365,8 +370,8 @@ class ImageKitService:
                 return json.dumps(
                     {
                         "success": False,
-                        "error": "Container file transfers require Proxmox plugin to be enabled",
-                        "suggestion": "Set ENABLE_PROXMOX=true in your .env file to use container features (ctid parameter)",
+                        "error": MSG_PROXMOX_REQUIRED,
+                        "suggestion": MSG_PROXMOX_ENABLE_SUGGESTION,
                     },
                     indent=2,
                 )

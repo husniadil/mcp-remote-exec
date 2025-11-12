@@ -239,9 +239,7 @@ class ProxmoxService:
         _log.info(f"Downloading {container_path} from container {ctid}")
 
         # Validate paths for directory traversal
-        is_valid, error = self.file_service.validate_paths(
-            container_path, local_path
-        )
+        is_valid, error = self.file_service.validate_paths(container_path, local_path)
         if not is_valid:
             return json.dumps(
                 {
@@ -342,9 +340,7 @@ class ProxmoxService:
         _log.info(f"Uploading {local_path} to container {ctid}")
 
         # Validate paths for directory traversal
-        is_valid, error = self.file_service.validate_paths(
-            container_path, local_path
-        )
+        is_valid, error = self.file_service.validate_paths(container_path, local_path)
         if not is_valid:
             return json.dumps(
                 {

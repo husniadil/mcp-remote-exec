@@ -24,16 +24,22 @@ class ProxmoxPlugin(BasePlugin):
         return "proxmox"
 
     def is_enabled(self, container: ServiceContainer) -> bool:
-        """Check if Proxmox plugin is enabled via configuration
+        """Check if Proxmox plugin should be activated
 
-        Uses ProxmoxConfig.from_env() to check enablement. Returns True if
-        ENABLE_PROXMOX=true, False otherwise. Proxmox requires no additional
-        configuration beyond the SSH connection (which is validated by SSHConfig).
+        Standardized plugin enablement pattern:
+        - Delegates to ProxmoxConfig.from_env() which performs all validation
+        - from_env() returns None if plugin is disabled
+        - No additional configuration needed (uses SSH creds from SSHConfig)
+
+        Returns:
+            True if plugin should be activated, False otherwise
         """
         config = ProxmoxConfig.from_env()
         if config is not None:
             _log.info("Proxmox plugin enabled")
             return True
+
+        _log.debug("Proxmox plugin disabled: ENABLE_PROXMOX not true")
         return False
 
     def register_tools(self, mcp: FastMCP, container: ServiceContainer) -> None:

@@ -32,6 +32,14 @@ class ProxmoxConfig:
         """
         Create config from environment variables.
 
+        Standardized plugin configuration pattern:
+        - Checks if plugin is enabled via ENABLE_PROXMOX flag
+        - Returns None if plugin should not be activated (disabled)
+        - Returns validated config instance if all checks pass
+
+        Note: Proxmox plugin uses SSH credentials from core SSHConfig,
+        so no additional credential validation is needed here.
+
         Returns:
             ProxmoxConfig if ENABLE_PROXMOX=true, None otherwise
         """
