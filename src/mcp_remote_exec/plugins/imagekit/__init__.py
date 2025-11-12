@@ -19,22 +19,33 @@ _log = logging.getLogger(__name__)
 class ImageKitPlugin(BasePlugin):
     """Plugin for ImageKit-based file transfers"""
 
+    def __init__(self) -> None:
+        """Initialize plugin with cached config"""
+        self._config: ImageKitConfig | None = None
+
     @property
     def name(self) -> str:
         return "imagekit"
 
     def is_enabled(self, container: ServiceContainer) -> bool:
-        """Check if ImageKit plugin should be activated"""
-        config = ImageKitConfig.from_env()
-        if not config:
+        """Check if ImageKit plugin should be activated
+
+        Uses a standardized enablement pattern consistent with other plugins:
+        1. Check ENABLE_IMAGEKIT environment variable
+        2. Validate plugin-specific configuration (credentials)
+        """
+        # Cache config to avoid redundant creation in register_tools()
+        self._config = ImageKitConfig.from_env()
+
+        if not self._config:
             _log.debug("ImageKit plugin disabled: credentials not configured")
             return False
 
-        if not config.is_enabled():
+        if not self._config.is_enabled():
             _log.debug("ImageKit plugin disabled: ENABLE_IMAGEKIT not set to true")
             return False
 
-        valid, error = config.validate()
+        valid, error = self._config.validate()
         if not valid:
             _log.warning(f"ImageKit plugin disabled: {error}")
             return False
@@ -44,15 +55,14 @@ class ImageKitPlugin(BasePlugin):
 
     def register_tools(self, mcp: FastMCP, container: ServiceContainer) -> None:
         """Register ImageKit tools and setup service"""
-        # Create ImageKit config and service
-        config = ImageKitConfig.from_env()
-        if not config:
+        # Use cached config from is_enabled() to avoid redundant creation
+        if not self._config:
             _log.error("ImageKit configuration not found")
             return
 
         # Create ImageKit service
         imagekit_service = ImageKitService(
-            config=config,
+            config=self._config,
             command_service=container.command_service,
             sftp_manager=container.sftp_manager,
             enabled_plugins=container.enabled_plugins,

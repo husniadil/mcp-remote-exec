@@ -24,7 +24,12 @@ class ProxmoxPlugin(BasePlugin):
         return "proxmox"
 
     def is_enabled(self, container: ServiceContainer) -> bool:
-        """Check if Proxmox plugin is enabled via ENABLE_PROXMOX env var"""
+        """Check if Proxmox plugin is enabled via ENABLE_PROXMOX env var
+
+        Uses a simple enablement pattern since Proxmox requires no additional
+        configuration beyond the SSH connection (which is validated by SSHConfig).
+        This is simpler than ImageKitPlugin which requires additional credentials.
+        """
         enabled = os.getenv("ENABLE_PROXMOX", "false").lower() == "true"
         if enabled:
             _log.info("Proxmox plugin enabled")

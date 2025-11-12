@@ -10,7 +10,7 @@ import os
 import uuid
 from typing import Any
 
-from mcp_remote_exec.constants import MSG_CONTAINER_NOT_FOUND, TEMP_FILE_PREFIX
+from mcp_remote_exec.config.constants import MSG_CONTAINER_NOT_FOUND, TEMP_FILE_PREFIX
 from mcp_remote_exec.data_access.path_validator import PathValidator
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.services.file_transfer_service import FileTransferService

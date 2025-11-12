@@ -9,7 +9,7 @@ import json
 from dataclasses import dataclass
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
-from mcp_remote_exec.constants import JSON_METADATA_OVERHEAD, MIN_OUTPUT_SPACE
+from mcp_remote_exec.config.constants import JSON_METADATA_OVERHEAD, MIN_OUTPUT_SPACE
 from mcp_remote_exec.data_access.ssh_connection_manager import ExecutionResult
 from mcp_remote_exec.data_access.sftp_manager import FileTransferResult
 

@@ -3,13 +3,23 @@ SSH Configuration Management for SSH MCP Remote Exec
 
 This module provides configuration handling for SSH connections and security settings
 with flexible authentication methods.
+
+Configuration Pattern:
+    SSHConfig uses a fail-fast initialization pattern where validation errors raise
+    ConfigError during __init__(). This is appropriate for core application configuration
+    that is required for the system to function. If SSH config is invalid, the application
+    cannot start.
+
+    Compare with optional plugin configs (like ImageKitConfig) which use a check-then-use
+    pattern where from_env() returns None if config is missing, allowing the plugin to
+    be gracefully disabled without stopping the application.
 """
 
 import os
 from dataclasses import dataclass
 
 from mcp_remote_exec.config.exceptions import ConfigError
-from mcp_remote_exec.constants import (
+from mcp_remote_exec.config.constants import (
     DEFAULT_CHARACTER_LIMIT,
     DEFAULT_MAX_FILE_SIZE,
     DEFAULT_TIMEOUT,

@@ -2,12 +2,22 @@
 ImageKit Configuration for SSH MCP Remote Exec
 
 Handles ImageKit authentication and configuration.
+
+Configuration Pattern:
+    ImageKitConfig uses a check-then-use pattern where from_env() returns None if
+    required credentials are missing. This is appropriate for optional plugin
+    configuration - if ImageKit credentials are not provided, the plugin is simply
+    not activated rather than causing application startup failure.
+
+    Compare with core configs (like SSHConfig) which use a fail-fast pattern that
+    raises exceptions during initialization, since core configuration is required
+    for the application to function.
 """
 
 import os
 from dataclasses import dataclass
 
-from mcp_remote_exec.constants import DEFAULT_TRANSFER_TIMEOUT_SECONDS
+from mcp_remote_exec.config.constants import DEFAULT_TRANSFER_TIMEOUT_SECONDS
 
 
 @dataclass

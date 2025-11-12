@@ -2,6 +2,13 @@
 ImageKit Service for SSH MCP Remote Exec
 
 Business logic for ImageKit file transfer operations.
+
+Design Note - Response Format:
+    Unlike ProxmoxService which supports both 'text' and 'json' response formats,
+    ImageKitService always returns JSON. This is by design because ImageKit implements
+    a two-phase transfer workflow that requires structured data (transfer_id,
+    upload_command, download_url) for the AI to parse and use in subsequent operations.
+    Plain text format would not support this workflow.
 """
 
 import json

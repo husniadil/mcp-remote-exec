@@ -2,7 +2,7 @@
 
 import pytest
 
-from mcp_remote_exec import constants
+from mcp_remote_exec.config import constants
 
 
 class TestConstants:

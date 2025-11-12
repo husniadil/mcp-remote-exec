@@ -7,7 +7,7 @@ Centralized path validation to prevent directory traversal and ensure file secur
 import os
 import warnings
 
-from mcp_remote_exec.constants import MSG_PATH_TRAVERSAL_ERROR
+from mcp_remote_exec.config.constants import MSG_PATH_TRAVERSAL_ERROR
 from mcp_remote_exec.data_access.exceptions import FileValidationError
 
 
@@ -104,8 +104,9 @@ class PathValidator:
         """
         Check multiple paths for directory traversal attempts.
 
-        Uses normalized path checking for security - normalizes path first,
-        then checks for ".." to prevent bypass attempts like "foo/./.."
+        This is a convenience method that validates multiple paths and returns
+        a tuple format for easy error handling in service layers. It uses
+        validate_path() internally to eliminate duplicate validation logic.
 
         Args:
             *paths: Variable number of paths to check
@@ -116,8 +117,14 @@ class PathValidator:
             - error_message: None if valid, error description if invalid
         """
         for path in paths:
-            # Normalize path before checking to prevent bypass attempts
-            normalized_path = os.path.normpath(path)
-            if ".." in normalized_path:
-                return False, MSG_PATH_TRAVERSAL_ERROR
+            try:
+                # Use validate_path internally to eliminate duplicate logic
+                PathValidator.validate_path(
+                    path,
+                    check_traversal=True,
+                    check_exists=False,
+                    path_type="path",
+                )
+            except FileValidationError as e:
+                return False, str(e)
         return True, None

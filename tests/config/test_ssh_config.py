@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.ssh_config import SSHConfig, HostConfig, SecurityConfig
-from mcp_remote_exec.constants import (
+from mcp_remote_exec.config.constants import (
     DEFAULT_CHARACTER_LIMIT,
     DEFAULT_MAX_FILE_SIZE,
     DEFAULT_TIMEOUT,
