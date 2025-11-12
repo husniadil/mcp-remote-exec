@@ -8,7 +8,8 @@ through natural language interfaces.
 Architecture (Clean/Hexagonal Architecture with Composition Root):
 The application follows a layered architecture with strict dependency rules:
 
-Core Layers (unidirectional dependencies: Presentation → Services → Data Access → Config):
+Core Layers (unidirectional dependencies: Presentation → Services → Data Access → Config → Common):
+- Layer 0: Common - Shared utilities, enums, and validators used across all layers
 - Layer 1: Configuration - SSH host setup, security settings, and configuration management
 - Layer 2: Data Access - SSH connections, SFTP operations, and domain exceptions
 - Layer 3: Services - Business logic, validation, and output formatting
