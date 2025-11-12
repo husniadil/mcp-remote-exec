@@ -435,10 +435,13 @@ src/mcp_remote_exec/
     ├── base.py                # Plugin interface
     ├── registry.py            # Plugin discovery and registration
     ├── imagekit/              # ImageKit file transfer plugin
-    │   ├── config.py
+    │   ├── config.py          # Plugin configuration
+    │   ├── constants.py       # Plugin-specific constants
+    │   ├── imagekit_client.py # ImageKit API client
     │   ├── models.py
     │   ├── service.py
-    │   └── tools.py
+    │   ├── tools.py
+    │   └── transfer_manager.py # Transfer state management
     └── proxmox/               # Proxmox container management plugin
         ├── config.py          # Plugin configuration
         ├── constants.py       # Plugin-specific constants

@@ -22,6 +22,8 @@ from mcp_remote_exec.plugins.imagekit.constants import (
     MSG_PROXMOX_REQUIRED,
     MSG_PROXMOX_ENABLE_SUGGESTION,
     MSG_TRANSFER_NOT_FOUND,
+    TEMP_FILE_PREFIX_UPLOAD,
+    TEMP_FILE_PREFIX_DOWNLOAD,
 )
 from mcp_remote_exec.plugins.imagekit.imagekit_client import ImageKitClient
 from mcp_remote_exec.plugins.imagekit.transfer_manager import TransferManager
@@ -246,7 +248,7 @@ class ImageKitService:
 
                 # Upload from MCP server to host temp location via SFTP
                 # Path is on remote SSH server, not local system
-                host_temp_path = f"/tmp/mcp-imagekit-{transfer_id}"  # nosec B108
+                host_temp_path = f"{TEMP_FILE_PREFIX_UPLOAD}-{transfer_id}"
                 upload_result = self.file_service.upload_file_raw(
                     local_path=local_temp_path,
                     remote_path=host_temp_path,
@@ -433,7 +435,7 @@ class ImageKitService:
             if ctid:
                 _log.info(f"Pulling file from container {ctid}: {remote_path}")
                 # Path is on remote SSH server, not local system
-                host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"  # nosec B108
+                host_temp_path = f"{TEMP_FILE_PREFIX_DOWNLOAD}-{transfer.transfer_id}"
 
                 pull_cmd = f"pct pull {ctid} {remote_path} {host_temp_path}"
                 pull_result = self.command_service.execute_command_raw(pull_cmd, 30)

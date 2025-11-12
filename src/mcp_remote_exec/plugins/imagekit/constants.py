@@ -10,6 +10,16 @@ Note on constant imports:
 """
 
 # =============================================================================
+# Temporary File Constants
+# =============================================================================
+
+TEMP_FILE_PREFIX_UPLOAD = "/tmp/mcp-imagekit-upload"
+"""Prefix for temporary files created during ImageKit upload operations on remote host"""
+
+TEMP_FILE_PREFIX_DOWNLOAD = "/tmp/mcp-imagekit-download"
+"""Prefix for temporary files created during ImageKit download operations on remote host"""
+
+# =============================================================================
 # Error Messages
 # =============================================================================
 

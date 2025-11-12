@@ -52,6 +52,7 @@ except PackageNotFoundError:
 __description__ = "SSH MCP Remote Exec for remote server management"
 
 # Package exports
+from .common import ResponseFormat
 from .config import SSHConfig, HostConfig, SecurityConfig
 from .data_access import (
     SSHConnectionManager,
@@ -71,7 +72,6 @@ from .services import (
     FormattedResult,
 )
 from .presentation import (
-    ResponseFormat,
     SSHExecCommandInput,
     SSHUploadFileInput,
     SSHDownloadFileInput,
