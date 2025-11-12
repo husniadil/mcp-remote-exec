@@ -8,7 +8,10 @@ import logging
 from datetime import datetime
 
 from mcp_remote_exec.config.ssh_config import SSHConfig
-from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
+from mcp_remote_exec.data_access.ssh_connection_manager import (
+    SSHConnectionManager,
+    ExecutionResult,
+)
 from mcp_remote_exec.data_access.exceptions import (
     CommandExecutionError,
     AuthenticationError,
@@ -92,3 +95,32 @@ class CommandService:
             context = f"Command: {command}"
             _log.error(f"{error_msg} - {context}")
             return self.output_formatter.format_error_result(error_msg, context).content
+
+    def execute_command_raw(
+        self,
+        command: str,
+        timeout: int = 30,
+    ) -> ExecutionResult:
+        """Execute SSH command and return raw execution result.
+
+        This method is intended for plugin services that need to process
+        command output programmatically (e.g., checking exit codes, parsing
+        stdout). For user-facing command execution, use execute_command()
+        which provides formatted output.
+
+        Args:
+            command: Bash command to execute
+            timeout: Command timeout in seconds (default: 30)
+
+        Returns:
+            ExecutionResult with exit_code, stdout, stderr, and timeout status
+
+        Raises:
+            AuthenticationError: If SSH authentication fails
+            CommandExecutionError: If command execution fails
+            SSHConnectionError: If SSH connection fails
+        """
+        host_config = self.config.get_host()
+        _log.debug(f"Executing raw command on {host_config.name}: {command[:100]}")
+
+        return self.connection_manager.execute_command(command, timeout)

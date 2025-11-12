@@ -53,8 +53,9 @@ class ImageKitPlugin(BasePlugin):
         # Create ImageKit service
         imagekit_service = ImageKitService(
             config=config,
-            connection_manager=container.connection_manager,
+            command_service=container.command_service,
             sftp_manager=container.sftp_manager,
+            enabled_plugins=container.enabled_plugins,
         )
 
         # Store service in plugin services for tool access

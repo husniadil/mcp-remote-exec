@@ -19,7 +19,7 @@ from mcp_remote_exec.plugins.imagekit.models import (
     DownloadRequestResult,
     TransferConfirmResult,
 )
-from mcp_remote_exec.data_access.ssh_connection_manager import SSHConnectionManager
+from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager
 
 _log = logging.getLogger(__name__)
@@ -31,20 +31,23 @@ class ImageKitService:
     def __init__(
         self,
         config: ImageKitConfig,
-        connection_manager: SSHConnectionManager,
+        command_service: CommandService,
         sftp_manager: SFTPManager,
+        enabled_plugins: set[str] | None = None,
     ):
         """
         Initialize ImageKit service.
 
         Args:
             config: ImageKit configuration
-            connection_manager: SSH connection manager for server-side operations
+            command_service: Command service for SSH operations
             sftp_manager: SFTP manager for file transfers between MCP server and SSH host
+            enabled_plugins: Set of enabled plugin names for cross-plugin coordination
         """
         self.config = config
-        self.connection_manager = connection_manager
+        self.command_service = command_service
         self.sftp_manager = sftp_manager
+        self.enabled_plugins = enabled_plugins or set()
         self.client = ImageKitClient(config)
         self.transfer_manager = TransferManager(timeout_seconds=config.transfer_timeout)
 
@@ -69,7 +72,7 @@ class ImageKitService:
         """
         # Validate container access requires Proxmox plugin
         if ctid is not None:
-            proxmox_enabled = os.getenv("ENABLE_PROXMOX", "false").lower() == "true"
+            proxmox_enabled = "proxmox" in self.enabled_plugins
             if not proxmox_enabled:
                 return json.dumps(
                     {
@@ -98,13 +101,13 @@ class ImageKitService:
         # Check if file exists (if not overwriting)
         if not overwrite:
             try:
-                ssh = self.connection_manager.get_connection()
                 if ctid:
                     # Check in container
                     check_cmd = f"pct exec {ctid} -- test -f {remote_path}"
-                    stdin, stdout, stderr = ssh.exec_command(check_cmd)
-                    exit_code = stdout.channel.recv_exit_status()
-                    if exit_code == 0:  # File exists in container
+                    check_result = self.command_service.execute_command_raw(
+                        check_cmd, 10
+                    )
+                    if check_result.exit_code == 0:  # File exists in container
                         return json.dumps(
                             {
                                 "success": False,
@@ -115,9 +118,10 @@ class ImageKitService:
                         )
                 else:
                     # Check on host
-                    stdin, stdout, stderr = ssh.exec_command(f"test -f {remote_path}")
-                    exit_code = stdout.channel.recv_exit_status()
-                    if exit_code == 0:  # File exists on host
+                    check_result = self.command_service.execute_command_raw(
+                        f"test -f {remote_path}", 10
+                    )
+                    if check_result.exit_code == 0:  # File exists on host
                         return json.dumps(
                             {
                                 "success": False,
@@ -221,8 +225,6 @@ class ImageKitService:
                 file_info["file_id"], local_temp_path
             )
 
-            ssh = self.connection_manager.get_connection()
-
             if transfer.ctid:
                 # Upload to container workflow
                 _log.info(
@@ -251,21 +253,22 @@ class ImageKitService:
                     )
 
                 # Push file from host to container
-                stdin, stdout, stderr = ssh.exec_command(
-                    f"pct push {transfer.ctid} {host_temp_path} {transfer.remote_path}"
+                push_result = self.command_service.execute_command_raw(
+                    f"pct push {transfer.ctid} {host_temp_path} {transfer.remote_path}",
+                    30,
                 )
-                exit_code = stdout.channel.recv_exit_status()
 
-                if exit_code != 0:
-                    error_output = stderr.read().decode()
+                if push_result.exit_code != 0:
                     # Cleanup
                     os.unlink(local_temp_path)
-                    ssh.exec_command(f"rm -f {host_temp_path}")
+                    self.command_service.execute_command_raw(
+                        f"rm -f {host_temp_path}", 5
+                    )
                     self.transfer_manager.complete_transfer(transfer_id)
                     return json.dumps(
                         {
                             "success": False,
-                            "error": f"Failed to push to container {transfer.ctid}: {error_output}",
+                            "error": f"Failed to push to container {transfer.ctid}: {push_result.stderr}",
                             "suggestion": "Check if container exists and is running",
                         },
                         indent=2,
@@ -274,13 +277,14 @@ class ImageKitService:
                 # Set permissions in container if specified
                 if transfer.permissions is not None:
                     perm_str = str(transfer.permissions)
-                    ssh.exec_command(
-                        f"pct exec {transfer.ctid} -- chmod {perm_str} {transfer.remote_path}"
+                    self.command_service.execute_command_raw(
+                        f"pct exec {transfer.ctid} -- chmod {perm_str} {transfer.remote_path}",
+                        10,
                     )
 
                 # Cleanup temp files
                 os.unlink(local_temp_path)
-                ssh.exec_command(f"rm -f {host_temp_path}")
+                self.command_service.execute_command_raw(f"rm -f {host_temp_path}", 5)
 
                 message = f"Successfully uploaded to container {transfer.ctid}: {transfer.remote_path}"
             else:
@@ -348,7 +352,7 @@ class ImageKitService:
         """
         # Validate container access requires Proxmox plugin
         if ctid is not None:
-            proxmox_enabled = os.getenv("ENABLE_PROXMOX", "false").lower() == "true"
+            proxmox_enabled = "proxmox" in self.enabled_plugins
             if not proxmox_enabled:
                 return json.dumps(
                     {
@@ -376,7 +380,6 @@ class ImageKitService:
 
         # Check if file exists (in container or on host)
         try:
-            ssh = self.connection_manager.get_connection()
             if ctid:
                 # Check file in container
                 check_cmd = f"pct exec {ctid} -- test -f {remote_path}"
@@ -384,9 +387,8 @@ class ImageKitService:
                 # Check file on host
                 check_cmd = f"test -f {remote_path}"
 
-            stdin, stdout, stderr = ssh.exec_command(check_cmd)
-            exit_code = stdout.channel.recv_exit_status()
-            if exit_code != 0:  # File doesn't exist
+            check_result = self.command_service.execute_command_raw(check_cmd, 10)
+            if check_result.exit_code != 0:  # File doesn't exist
                 location = f"container {ctid}" if ctid else "host"
                 return json.dumps(
                     {
@@ -419,18 +421,15 @@ class ImageKitService:
                 # Path is on remote SSH server, not local system
                 host_temp_path = f"/tmp/mcp-imagekit-download-{transfer.transfer_id}"  # nosec B108
 
-                ssh = self.connection_manager.get_connection()
                 pull_cmd = f"pct pull {ctid} {remote_path} {host_temp_path}"
-                stdin, stdout, stderr = ssh.exec_command(pull_cmd)
-                exit_code = stdout.channel.recv_exit_status()
+                pull_result = self.command_service.execute_command_raw(pull_cmd, 30)
 
-                if exit_code != 0:
-                    error_msg = stderr.read().decode().strip()
+                if pull_result.exit_code != 0:
                     self.transfer_manager.complete_transfer(transfer.transfer_id)
                     return json.dumps(
                         {
                             "success": False,
-                            "error": f"Failed to pull from container {ctid}: {error_msg}",
+                            "error": f"Failed to pull from container {ctid}: {pull_result.stderr}",
                         },
                         indent=2,
                     )
@@ -454,8 +453,9 @@ class ImageKitService:
                 os.unlink(local_temp_path)
                 # Clean up host temp file if we created one
                 if host_temp_path:
-                    ssh = self.connection_manager.get_connection()
-                    ssh.exec_command(f"rm -f {host_temp_path}")
+                    self.command_service.execute_command_raw(
+                        f"rm -f {host_temp_path}", 5
+                    )
                 self.transfer_manager.complete_transfer(transfer.transfer_id)
                 return json.dumps(
                     {
@@ -467,8 +467,7 @@ class ImageKitService:
 
             # Clean up host temp file if we created one
             if host_temp_path:
-                ssh = self.connection_manager.get_connection()
-                ssh.exec_command(f"rm -f {host_temp_path}")
+                self.command_service.execute_command_raw(f"rm -f {host_temp_path}", 5)
 
             # Upload to ImageKit from MCP server
             file_name = f"mcp-download-{transfer.transfer_id}"

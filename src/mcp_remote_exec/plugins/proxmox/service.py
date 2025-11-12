@@ -80,13 +80,10 @@ class ProxmoxService:
         """
         _log.debug("Listing Proxmox containers")
 
-        result = self.command_service.execute_command("pct list", 30, "text")
+        result = self.command_service.execute_command_raw("pct list", 30)
 
-        # Extract stdout from result (strip metadata and formatting)
-        stdout = self._extract_stdout(result)
-
-        # Parse output
-        containers = self._parse_pct_list_output(stdout)
+        # Parse output from stdout
+        containers = self._parse_pct_list_output(result.stdout)
 
         if response_format.lower() == "json":
             return json.dumps(containers, indent=2)
@@ -115,15 +112,10 @@ class ProxmoxService:
         _log.debug(f"Getting status for container {ctid}")
 
         try:
-            result = self.command_service.execute_command(
-                f"pct status {ctid}", 30, "text"
-            )
+            result = self.command_service.execute_command_raw(f"pct status {ctid}", 30)
 
-            # Extract stdout
-            stdout = self._extract_stdout(result)
-
-            # Parse status
-            status_data = self._parse_pct_status_output(stdout)
+            # Parse status from stdout
+            status_data = self._parse_pct_status_output(result.stdout)
 
             if response_format.lower() == "json":
                 return json.dumps(status_data, indent=2)
