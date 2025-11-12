@@ -58,33 +58,6 @@ class TestPathValidator:
         with pytest.raises(FileValidationError, match="Container path"):
             PathValidator.validate_path("", path_type="container")
 
-    def test_validate_file_path_remote(self):
-        """Test legacy interface for remote file validation"""
-        # Should pass for valid remote path
-        PathValidator.validate_file_path("/var/www/html/index.html", remote_operation=True)
-
-        # Should fail for traversal
-        with pytest.raises(FileValidationError):
-            PathValidator.validate_file_path("../etc/passwd", remote_operation=True)
-
-    def test_validate_file_path_local(self, tmp_path):
-        """Test legacy interface for local file validation"""
-        test_file = tmp_path / "test.txt"
-        test_file.write_text("test")
-
-        # Should pass for existing local file
-        PathValidator.validate_file_path(
-            str(test_file), remote_operation=False, check_existence=True
-        )
-
-        # Should fail for non-existing local file
-        with pytest.raises(FileValidationError):
-            PathValidator.validate_file_path(
-                str(tmp_path / "missing.txt"),
-                remote_operation=False,
-                check_existence=True,
-            )
-
     def test_check_paths_for_traversal_all_valid(self):
         """Test multiple paths all valid"""
         is_valid, error = PathValidator.check_paths_for_traversal(
