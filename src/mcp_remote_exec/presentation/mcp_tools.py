@@ -17,7 +17,7 @@ from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.services.file_transfer_service import FileTransferService
 from mcp_remote_exec.services.output_formatter import OutputFormatter
 from mcp_remote_exec.presentation.service_container import ServiceContainer
-from mcp_remote_exec.presentation.request_models import (
+from mcp_remote_exec.presentation.models import (
     ResponseFormat,
     SSHExecCommandInput,
     SSHUploadFileInput,
@@ -147,13 +147,6 @@ async def ssh_exec_command(
         Formatted command output with execution metadata
     """
     try:
-        # Validate command is not empty (required parameter)
-        if not command or not command.strip():
-            services = get_services()
-            return services.output_formatter.format_error_result(
-                "Input validation error: 'command' parameter is required and cannot be empty"
-            ).content
-
         # Validate input using Pydantic model
         input_data = SSHExecCommandInput(
             command=command,
@@ -220,18 +213,6 @@ def _register_ssh_file_transfer_tools() -> None:
             Transfer result with metadata (bytes transferred, speed, etc.)
         """
         try:
-            # Validate required parameters are not empty
-            if not local_path or not local_path.strip():
-                services = get_services()
-                return services.output_formatter.format_error_result(
-                    "Input validation error: 'local_path' parameter is required and cannot be empty"
-                ).content
-            if not remote_path or not remote_path.strip():
-                services = get_services()
-                return services.output_formatter.format_error_result(
-                    "Input validation error: 'remote_path' parameter is required and cannot be empty"
-                ).content
-
             # Validate input
             input_data = SSHUploadFileInput(
                 local_path=local_path,
@@ -292,18 +273,6 @@ def _register_ssh_file_transfer_tools() -> None:
             Transfer result with metadata (bytes transferred, speed, etc.)
         """
         try:
-            # Validate required parameters are not empty
-            if not remote_path or not remote_path.strip():
-                services = get_services()
-                return services.output_formatter.format_error_result(
-                    "Input validation error: 'remote_path' parameter is required and cannot be empty"
-                ).content
-            if not local_path or not local_path.strip():
-                services = get_services()
-                return services.output_formatter.format_error_result(
-                    "Input validation error: 'local_path' parameter is required and cannot be empty"
-                ).content
-
             # Validate input
             input_data = SSHDownloadFileInput(
                 remote_path=remote_path, local_path=local_path, overwrite=overwrite

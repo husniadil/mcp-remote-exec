@@ -4,7 +4,7 @@ Presentation Layer for SSH MCP Remote Exec
 Provides MCP tool interfaces, input validation models, and response formatting.
 """
 
-from mcp_remote_exec.presentation.request_models import (
+from mcp_remote_exec.presentation.models import (
     ResponseFormat,
     SSHExecCommandInput,
     SSHUploadFileInput,

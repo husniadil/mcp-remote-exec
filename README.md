@@ -394,7 +394,7 @@ src/mcp_remote_exec/
 └── presentation/              # FastMCP tools
     ├── __init__.py
     ├── mcp_tools.py
-    └── request_models.py
+    └── models.py
 ```
 
 ## Security Best Practices

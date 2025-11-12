@@ -11,7 +11,7 @@ from mcp_remote_exec.plugins.proxmox.models import (
     ProxmoxDownloadFileInput,
     ProxmoxUploadFileInput,
 )
-from mcp_remote_exec.presentation.request_models import ResponseFormat
+from mcp_remote_exec.presentation.models import ResponseFormat
 
 
 class TestProxmoxContainerExecInput:

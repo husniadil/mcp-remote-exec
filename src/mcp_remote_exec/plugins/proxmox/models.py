@@ -6,7 +6,7 @@ Input validation for Proxmox container operations.
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
-from mcp_remote_exec.presentation.request_models import ResponseFormat
+from mcp_remote_exec.presentation.models import ResponseFormat
 from mcp_remote_exec.presentation.validators import (
     validate_octal_permissions as validate_permissions,
 )

@@ -54,7 +54,6 @@ class ProxmoxPlugin(BasePlugin):
         imagekit_enabled = "imagekit" in container.enabled_plugins
         if not imagekit_enabled:
             register_proxmox_file_tools(mcp, container)
-            _log.info("Proxmox tools registered (with file transfer)")
         else:
             _log.warning(
                 "Proxmox file transfer tools NOT registered - ImageKit plugin is active"
