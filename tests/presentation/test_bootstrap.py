@@ -1,7 +1,7 @@
 """Tests for Bootstrap Module (Composition Root)"""
 
 import pytest
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 from fastmcp import FastMCP
 
 from mcp_remote_exec.presentation import bootstrap

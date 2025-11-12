@@ -3,15 +3,13 @@
 import pytest
 from pydantic import ValidationError
 
+from mcp_remote_exec.common.enums import ResponseFormat
 from mcp_remote_exec.plugins.proxmox.models import (
     ProxmoxContainerExecInput,
-    ProxmoxListContainersInput,
-    ProxmoxContainerStatusInput,
     ProxmoxContainerActionInput,
     ProxmoxDownloadFileInput,
     ProxmoxUploadFileInput,
 )
-from mcp_remote_exec.presentation.models import ResponseFormat
 
 
 class TestProxmoxContainerExecInput:

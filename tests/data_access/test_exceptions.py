@@ -1,6 +1,5 @@
 """Tests for custom exceptions"""
 
-import pytest
 from mcp_remote_exec.data_access.exceptions import (
     SSHConnectionError,
     AuthenticationError,

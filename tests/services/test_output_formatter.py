@@ -1,6 +1,5 @@
 """Tests for Output Formatter"""
 
-import pytest
 from mcp_remote_exec.services.output_formatter import OutputFormatter, FormattedResult
 from mcp_remote_exec.data_access.ssh_connection_manager import ExecutionResult
 from mcp_remote_exec.data_access.sftp_manager import FileTransferResult

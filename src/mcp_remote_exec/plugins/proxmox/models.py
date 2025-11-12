@@ -6,10 +6,11 @@ Input validation for Proxmox container operations.
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
-from mcp_remote_exec.presentation.models import ResponseFormat
-from mcp_remote_exec.presentation.validators import (
+from mcp_remote_exec.common.enums import ResponseFormat
+from mcp_remote_exec.common.validators import (
     validate_octal_permissions as validate_permissions,
 )
+from mcp_remote_exec.config.constants import MAX_TIMEOUT
 
 
 class ProxmoxContainerExecInput(BaseModel):
@@ -29,7 +30,10 @@ class ProxmoxContainerExecInput(BaseModel):
         max_length=10000,
     )
     timeout: int = Field(
-        default=30, description="Command timeout in seconds (default: 30)", ge=1, le=300
+        default=30,
+        description=f"Command timeout in seconds (default: 30, max: {MAX_TIMEOUT})",
+        ge=1,
+        le=MAX_TIMEOUT,
     )
     response_format: ResponseFormat = Field(
         default=ResponseFormat.TEXT,

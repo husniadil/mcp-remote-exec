@@ -1,7 +1,6 @@
 """Tests for ImageKit Plugin Configuration"""
 
 import os
-import pytest
 from unittest.mock import patch
 
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig

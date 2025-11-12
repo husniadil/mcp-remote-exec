@@ -1,6 +1,5 @@
 """Tests for configuration exceptions"""
 
-import pytest
 from mcp_remote_exec.config.exceptions import ConfigError
 
 

@@ -1,6 +1,5 @@
 """Tests for Service Constants"""
 
-import pytest
 
 from mcp_remote_exec.config import constants
 

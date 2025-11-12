@@ -132,7 +132,7 @@ class TestImageKitRequestUpload:
         imagekit_service = mock_container.plugin_services["imagekit"]
 
         tool = tool_functions["imagekit_request_upload"]
-        result = await tool(
+        await tool(
             remote_path="/app/config.txt",
             permissions=755,
             overwrite=True,
@@ -218,7 +218,7 @@ class TestImageKitConfirmUpload:
         imagekit_service = mock_container.plugin_services["imagekit"]
 
         tool = tool_functions["imagekit_confirm_upload"]
-        result = await tool(
+        await tool(
             transfer_id="test-123",
             file_id="690b82f45c7cd75eb8328078"
         )
@@ -275,7 +275,7 @@ class TestImageKitRequestDownload:
         imagekit_service = mock_container.plugin_services["imagekit"]
 
         tool = tool_functions["imagekit_request_download"]
-        result = await tool(remote_path="/app/logs/app.log", ctid=100)
+        await tool(remote_path="/app/logs/app.log", ctid=100)
 
         imagekit_service.request_download.assert_called_once_with(
             remote_path="/app/logs/app.log",

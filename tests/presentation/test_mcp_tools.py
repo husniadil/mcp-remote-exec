@@ -8,7 +8,7 @@ Tests the ssh_exec_command tool and file transfer tools to ensure:
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 # Patch bootstrap.initialize before importing mcp_tools to prevent module-level initialization
 with patch("mcp_remote_exec.presentation.bootstrap.initialize"):

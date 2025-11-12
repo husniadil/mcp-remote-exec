@@ -7,7 +7,7 @@ connection management, command execution, authentication, and error handling.
 
 import pytest
 import socket
-from unittest.mock import MagicMock, patch, Mock, PropertyMock
+from unittest.mock import MagicMock, patch, Mock
 from mcp_remote_exec.data_access.ssh_connection_manager import (
     SSHConnectionManager,
     ExecutionResult,

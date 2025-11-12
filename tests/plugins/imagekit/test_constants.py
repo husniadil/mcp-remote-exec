@@ -1,6 +1,5 @@
 """Tests for ImageKit Plugin Constants"""
 
-import pytest
 from mcp_remote_exec.plugins.imagekit import constants
 
 

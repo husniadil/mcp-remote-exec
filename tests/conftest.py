@@ -1,8 +1,7 @@
 """Pytest configuration and fixtures"""
 
-import os
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from mcp_remote_exec.config.ssh_config import SSHConfig, HostConfig, SecurityConfig
 
 

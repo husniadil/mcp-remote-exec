@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from mcp_remote_exec.presentation.validators import (
+from mcp_remote_exec.common.validators import (
     validate_octal_permissions as validate_permissions,
 )
 

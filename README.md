@@ -24,22 +24,28 @@ This MCP server follows Clean/Hexagonal Architecture principles with a clear sep
 ### Core Layers (Unidirectional Dependencies)
 The application has strict layering where each layer only depends on layers below it:
 
+- **Layer 0: Common** - Shared utilities, enums, and validators used across all layers
 - **Layer 1: Configuration** - SSH host setup, security settings, configuration management
 - **Layer 2: Data Access** - SSH connections, SFTP operations, domain exceptions
 - **Layer 3: Services** - Business logic, validation, output formatting, data access wrappers
 - **Layer 4: Presentation** - FastMCP tools, input models, AI interface
 
 ### Composition Root
-- **Bootstrap Module** (`presentation/bootstrap.py`) - Central initialization point that knows about all layers and wires dependencies together. This is the only module that imports from all layers, maintaining proper separation of concerns throughout the rest of the codebase.
+- **Bootstrap Module** (`presentation/bootstrap.py`) - Central initialization point that knows about all layers and wires dependencies together
+- **Package Root** (`__init__.py`) - Provides public API by re-exporting from all layers for convenience
+
+Note: While the bootstrap module and package root both import from all layers, the rest of the codebase maintains strict unidirectional dependencies.
 
 ### Extensions
-- **Plugin System** - Optional functionality that extends core capabilities (e.g., Proxmox container management, ImageKit file transfers). Plugins follow the same layering rules, accessing functionality through the services layer.
+- **Plugin System** - Optional functionality that extends core capabilities (e.g., Proxmox container management, ImageKit file transfers). Plugins access shared code from the common layer and functionality through the services layer.
 
 ### Dependency Rules
 - Presentation → Services → Data Access → Configuration (unidirectional, no upward dependencies)
+- Common layer can be imported by any layer (shared utilities)
 - Services layer provides wrappers for data access operations to maintain layer separation
 - Bootstrap module handles all cross-layer initialization
 - Plugins integrate through dependency injection via the ServiceContainer
+- Plugins import shared code from common layer (not from presentation layer)
 
 ## Features
 
@@ -101,6 +107,7 @@ IMAGEKIT_PUBLIC_KEY=your_public_key
 IMAGEKIT_PRIVATE_KEY=your_private_key
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_id
 IMAGEKIT_FOLDER=/mcp-remote-exec  # Optional: organize files in a folder
+IMAGEKIT_TRANSFER_TIMEOUT=300  # Optional: transfer timeout in seconds (default: 300)
 ENABLE_IMAGEKIT=true
 ```
 
@@ -393,6 +400,10 @@ uv run mcp-remote-exec
 ```
 src/mcp_remote_exec/
 ├── main.py                    # CLI entry point
+├── common/                    # Layer 0: Common
+│   ├── __init__.py
+│   ├── enums.py               # Shared enumerations
+│   └── validators.py          # Shared validators
 ├── config/                    # Layer 1: Configuration
 │   ├── __init__.py
 │   ├── constants.py           # Core application constants
@@ -415,7 +426,7 @@ src/mcp_remote_exec/
 │   ├── mcp_tools.py           # Core MCP tools
 │   ├── models.py              # Input validation models
 │   ├── service_container.py   # Dependency injection container
-│   └── validators.py
+│   └── validators.py          # Re-exports from common (backward compat)
 └── plugins/                   # Extensions
     ├── base.py                # Plugin interface
     ├── registry.py            # Plugin discovery and registration

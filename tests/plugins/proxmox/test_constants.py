@@ -1,6 +1,5 @@
 """Tests for Proxmox Plugin Constants"""
 
-import pytest
 from mcp_remote_exec.plugins.proxmox import constants
 
 

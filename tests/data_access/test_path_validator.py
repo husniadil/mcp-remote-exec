@@ -1,6 +1,5 @@
 """Tests for Path Validator"""
 
-import os
 import pytest
 from mcp_remote_exec.data_access.path_validator import PathValidator, MSG_PATH_TRAVERSAL_ERROR
 from mcp_remote_exec.data_access.exceptions import FileValidationError

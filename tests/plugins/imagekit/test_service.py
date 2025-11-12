@@ -2,8 +2,7 @@
 
 import json
 import pytest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
+from unittest.mock import MagicMock
 
 from mcp_remote_exec.plugins.imagekit.service import ImageKitService
 from mcp_remote_exec.plugins.imagekit.config import ImageKitConfig

@@ -2,7 +2,7 @@
 
 import json
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from mcp_remote_exec.plugins.proxmox.service import ProxmoxService
 from mcp_remote_exec.data_access.ssh_connection_manager import ExecutionResult

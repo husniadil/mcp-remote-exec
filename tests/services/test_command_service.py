@@ -5,7 +5,7 @@ Basic smoke tests for command service functionality.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.data_access.ssh_connection_manager import ExecutionResult
 

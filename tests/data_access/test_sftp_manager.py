@@ -5,7 +5,7 @@ Basic smoke tests for SFTP manager functionality.
 """
 
 import pytest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager, FileTransferResult
 
 

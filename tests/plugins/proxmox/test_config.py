@@ -1,7 +1,6 @@
 """Tests for Proxmox Plugin Configuration"""
 
 import os
-import pytest
 from unittest.mock import patch
 
 from mcp_remote_exec.plugins.proxmox.config import ProxmoxConfig

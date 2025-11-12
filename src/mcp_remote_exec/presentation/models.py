@@ -4,19 +4,13 @@ Request Models for SSH MCP Remote Exec
 Pydantic models for input validation and type checking in FastMCP tools.
 """
 
-from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
-from mcp_remote_exec.presentation.validators import (
+from mcp_remote_exec.common.enums import ResponseFormat
+from mcp_remote_exec.common.validators import (
     validate_octal_permissions as validate_permissions,
 )
-
-
-class ResponseFormat(str, Enum):
-    """Output format for tool responses"""
-
-    TEXT = "text"
-    JSON = "json"
+from mcp_remote_exec.config.constants import MAX_TIMEOUT
 
 
 class SSHExecCommandInput(BaseModel):
@@ -35,9 +29,9 @@ class SSHExecCommandInput(BaseModel):
 
     timeout: int = Field(
         30,
-        description="Command timeout in seconds (default: 30, max: 300)",
+        description=f"Command timeout in seconds (default: 30, max: {MAX_TIMEOUT})",
         ge=1,
-        le=300,
+        le=MAX_TIMEOUT,
     )
 
     response_format: ResponseFormat = Field(

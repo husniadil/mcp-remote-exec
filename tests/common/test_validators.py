@@ -1,12 +1,8 @@
-"""Tests for Presentation Layer Validator Re-exports
-
-This tests the backward compatibility re-exports from presentation.validators.
-For testing the actual implementation, see tests/common/test_validators.py
-"""
+"""Tests for Common Validators"""
 
 import pytest
 
-from mcp_remote_exec.presentation.validators import validate_octal_permissions
+from mcp_remote_exec.common.validators import validate_octal_permissions
 
 
 class TestValidateOctalPermissions:

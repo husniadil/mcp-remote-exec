@@ -130,7 +130,7 @@ class TestProxmoxContainerExecCommand:
         proxmox_service = mock_container.plugin_services["proxmox"]
 
         tool = tool_functions["proxmox_container_exec_command"]
-        result = await tool(ctid=101, command="whoami", timeout=10, response_format="json")
+        await tool(ctid=101, command="whoami", timeout=10, response_format="json")
 
         proxmox_service.exec_in_container.assert_called_once_with(
             ctid=101,
@@ -198,7 +198,7 @@ class TestProxmoxListContainers:
         proxmox_service = mock_container.plugin_services["proxmox"]
 
         tool = tool_functions["proxmox_list_containers"]
-        result = await tool(response_format="json")
+        await tool(response_format="json")
 
         proxmox_service.list_containers.assert_called_once_with(response_format="json")
 
