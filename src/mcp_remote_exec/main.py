@@ -14,11 +14,13 @@ import sys
 import logging
 from dotenv import load_dotenv
 
+from mcp_remote_exec import __version__
+
 # Load environment variables from .env file BEFORE any imports that use config
+# mcp_tools imports bootstrap which initializes SSHConfig (reads env vars)
 load_dotenv()
 
-from mcp_remote_exec import __version__
-from mcp_remote_exec.presentation.mcp_tools import mcp
+from mcp_remote_exec.presentation.mcp_tools import mcp  # noqa: E402
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
