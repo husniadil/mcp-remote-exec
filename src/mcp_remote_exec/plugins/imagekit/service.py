@@ -21,6 +21,7 @@ from mcp_remote_exec.plugins.imagekit.models import (
 )
 from mcp_remote_exec.services.command_service import CommandService
 from mcp_remote_exec.data_access.sftp_manager import SFTPManager
+from mcp_remote_exec.data_access.path_validator import PathValidator
 
 _log = logging.getLogger(__name__)
 
@@ -89,11 +90,12 @@ class ImageKitService:
             _log.info(f"Upload request for {remote_path} on host")
 
         # Validate remote path
-        if ".." in remote_path:
+        is_valid, error = PathValidator.check_paths_for_traversal(remote_path)
+        if not is_valid:
             return json.dumps(
                 {
                     "success": False,
-                    "error": "Path cannot contain '..' (path traversal not allowed)",
+                    "error": error,
                 },
                 indent=2,
             )
@@ -369,11 +371,12 @@ class ImageKitService:
             _log.info(f"Download request for {remote_path} from host")
 
         # Validate remote path
-        if ".." in remote_path:
+        is_valid, error = PathValidator.check_paths_for_traversal(remote_path)
+        if not is_valid:
             return json.dumps(
                 {
                     "success": False,
-                    "error": "Path cannot contain '..' (path traversal not allowed)",
+                    "error": error,
                 },
                 indent=2,
             )
