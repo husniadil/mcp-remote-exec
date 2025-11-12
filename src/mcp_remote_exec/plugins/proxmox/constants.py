@@ -4,15 +4,16 @@ Constants for Proxmox Plugin
 Plugin-specific constants for Proxmox container management operations.
 """
 
-import os
-import tempfile
-
 # =============================================================================
 # Temporary File Constants
 # =============================================================================
 
-TEMP_FILE_PREFIX = os.path.join(tempfile.gettempdir(), "mcp-remote-exec")
-"""Prefix for temporary files created during Proxmox file transfer operations"""
+TEMP_FILE_PREFIX = "/tmp/mcp-remote-exec"
+"""Prefix for temporary files created during Proxmox file transfer operations on remote host.
+
+Note: This is a path on the remote SSH/Proxmox host, not the local MCP server.
+We use a hardcoded Unix path because SSH servers and Proxmox VE hosts are always Unix-like systems.
+"""
 
 # =============================================================================
 # Error Messages
