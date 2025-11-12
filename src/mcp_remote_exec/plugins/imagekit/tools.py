@@ -100,9 +100,13 @@ def register_imagekit_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="imagekit_confirm_upload")
     async def imagekit_confirm_upload(
@@ -152,9 +156,13 @@ def register_imagekit_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="imagekit_request_download")
     async def imagekit_request_download(
@@ -204,9 +212,13 @@ def register_imagekit_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="imagekit_confirm_download")
     async def imagekit_confirm_download(
@@ -234,8 +246,12 @@ def register_imagekit_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             return imagekit_service.confirm_download(transfer_id=input_data.transfer_id)
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     _log.info("Registered 4 ImageKit file transfer tools")

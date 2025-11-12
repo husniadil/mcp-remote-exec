@@ -6,6 +6,13 @@ from unittest.mock import patch
 
 from mcp_remote_exec.config.exceptions import ConfigError
 from mcp_remote_exec.config.ssh_config import SSHConfig, HostConfig, SecurityConfig
+from mcp_remote_exec.constants import (
+    DEFAULT_CHARACTER_LIMIT,
+    DEFAULT_MAX_FILE_SIZE,
+    DEFAULT_TIMEOUT,
+    MAX_TIMEOUT,
+    DEFAULT_SSH_PORT,
+)
 
 
 class TestHostConfig:
@@ -251,8 +258,8 @@ class TestSSHConfig:
 
     def test_default_constants(self):
         """Test default constants are set correctly"""
-        assert SSHConfig.DEFAULT_CHARACTER_LIMIT == 25000
-        assert SSHConfig.DEFAULT_MAX_FILE_SIZE == 10485760
-        assert SSHConfig.DEFAULT_TIMEOUT == 30
-        assert SSHConfig.MAX_TIMEOUT == 300
-        assert SSHConfig.DEFAULT_SSH_PORT == 22
+        assert DEFAULT_CHARACTER_LIMIT == 25000
+        assert DEFAULT_MAX_FILE_SIZE == 10485760
+        assert DEFAULT_TIMEOUT == 30
+        assert MAX_TIMEOUT == 300
+        assert DEFAULT_SSH_PORT == 22

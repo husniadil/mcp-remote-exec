@@ -107,7 +107,7 @@ class FileTransferService:
 
         host_config = self.config.get_host()
         metadata = [
-            "\n=== TRANSFER METADATA ===",
+            "\n\n=== TRANSFER METADATA ===",
             f"Host: {host_config.name}",
             f"Operation: {operation}",
             f"Timestamp: {datetime.now().isoformat()}",

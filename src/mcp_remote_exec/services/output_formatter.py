@@ -20,7 +20,9 @@ class FormattedResult:
 
     content: str  # The formatted output content (may be truncated)
     truncated: bool = False  # Whether the output was truncated due to size limits
-    original_length: int | None = None  # Original content length before truncation (None if not truncated)
+    original_length: int | None = (
+        None  # Original content length before truncation (None if not truncated)
+    )
     format_type: str = "text"  # Output format type: "text" for human-readable, "json" for structured data
 
 
@@ -37,7 +39,16 @@ class OutputFormatter:
         format_type: str = "text",
         max_length: int | None = None,
     ) -> FormattedResult:
-        """Format SSH command execution result"""
+        """Format SSH command execution result.
+
+        Args:
+            result: Execution result from SSH command
+            format_type: Output format - "text" or "json" (default: "text")
+            max_length: Maximum output length, uses config limit if None
+
+        Returns:
+            FormattedResult with content, truncation status, and metadata
+        """
 
         # Use configured limit if not specified
         if max_length is None:
@@ -163,7 +174,14 @@ class OutputFormatter:
     def format_file_transfer_result(
         self, result: FileTransferResult
     ) -> FormattedResult:
-        """Format file transfer operation result"""
+        """Format file transfer operation result.
+
+        Args:
+            result: File transfer result with operation details
+
+        Returns:
+            FormattedResult with transfer status and details
+        """
 
         if result.success:
             sections = [
@@ -199,7 +217,15 @@ class OutputFormatter:
     def truncate_output(
         self, output: str, max_length: int | None = None
     ) -> FormattedResult:
-        """Simple output truncation"""
+        """Truncate output to specified maximum length.
+
+        Args:
+            output: Text output to truncate
+            max_length: Maximum length, uses config limit if None
+
+        Returns:
+            FormattedResult with truncated content and metadata
+        """
 
         if max_length is None:
             max_length = self.config.security.character_limit

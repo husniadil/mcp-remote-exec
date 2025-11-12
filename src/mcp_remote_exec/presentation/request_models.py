@@ -54,11 +54,17 @@ class SSHUploadFileInput(BaseModel):
     )
 
     local_path: str = Field(
-        ..., description="Local file path to upload - absolute or relative (required)"
+        ...,
+        description="Local file path to upload - absolute or relative (required)",
+        min_length=1,
+        max_length=4096,
     )
 
     remote_path: str = Field(
-        ..., description="Remote destination path on your SSH server (required)"
+        ...,
+        description="Remote destination path on your SSH server (required)",
+        min_length=1,
+        max_length=4096,
     )
 
     overwrite: bool = Field(
@@ -92,11 +98,17 @@ class SSHDownloadFileInput(BaseModel):
     )
 
     remote_path: str = Field(
-        ..., description="Remote file path on your SSH server to download (required)"
+        ...,
+        description="Remote file path on your SSH server to download (required)",
+        min_length=1,
+        max_length=4096,
     )
 
     local_path: str = Field(
-        ..., description="Local destination path - absolute or relative (required)"
+        ...,
+        description="Local destination path - absolute or relative (required)",
+        min_length=1,
+        max_length=4096,
     )
 
     overwrite: bool = Field(

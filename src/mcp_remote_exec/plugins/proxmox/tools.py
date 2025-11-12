@@ -88,9 +88,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="proxmox_list_containers")
     async def proxmox_list_containers(
@@ -122,9 +126,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="proxmox_container_status")
     async def proxmox_container_status(
@@ -157,9 +165,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="proxmox_start_container")
     async def proxmox_start_container(
@@ -185,9 +197,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             return proxmox_service.start_container(ctid=input_data.ctid)
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="proxmox_stop_container")
     async def proxmox_stop_container(
@@ -213,9 +229,13 @@ def register_proxmox_tools(mcp: FastMCP, container: ServiceContainer) -> None:
             return proxmox_service.stop_container(ctid=input_data.ctid)
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     _log.info("Registered 5 Proxmox container management tools")
 
@@ -293,9 +313,13 @@ def register_proxmox_file_tools(mcp: FastMCP, container: ServiceContainer) -> No
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="proxmox_upload_file_to_container")
     async def proxmox_upload_file_to_container(
@@ -358,8 +382,12 @@ def register_proxmox_file_tools(mcp: FastMCP, container: ServiceContainer) -> No
             )
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            return container.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     _log.info("Registered 2 Proxmox file transfer tools")

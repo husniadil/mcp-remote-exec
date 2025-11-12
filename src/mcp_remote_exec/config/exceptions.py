@@ -22,4 +22,20 @@ class ConfigError(Exception):
         - Risk acceptance not provided
     """
 
-    pass
+    def __init__(
+        self,
+        message: str,
+        config_key: str | None = None,
+        reason: str | None = None,
+    ):
+        """
+        Initialize configuration error with context.
+
+        Args:
+            message: Error description message
+            config_key: Configuration key that caused error (e.g., "HOST", "SSH_KEY")
+            reason: Error reason category (e.g., "missing", "invalid", "not_found")
+        """
+        self.config_key = config_key
+        self.reason = reason
+        super().__init__(message)

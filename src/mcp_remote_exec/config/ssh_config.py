@@ -53,13 +53,6 @@ class SecurityConfig:
 class SSHConfig:
     """Main SSH configuration class"""
 
-    # Constants (imported from centralized constants module)
-    DEFAULT_CHARACTER_LIMIT = DEFAULT_CHARACTER_LIMIT
-    DEFAULT_MAX_FILE_SIZE = DEFAULT_MAX_FILE_SIZE
-    DEFAULT_TIMEOUT = DEFAULT_TIMEOUT
-    MAX_TIMEOUT = MAX_TIMEOUT
-    DEFAULT_SSH_PORT = DEFAULT_SSH_PORT
-
     def __init__(self) -> None:
         """Initialize configuration from environment variables"""
         # STEP 1: Check risk acceptance FIRST before any other initialization
@@ -81,13 +74,11 @@ class SSHConfig:
         self.security = SecurityConfig(
             accept_risks=accept_risks,
             character_limit=int(
-                os.getenv("CHARACTER_LIMIT", str(self.DEFAULT_CHARACTER_LIMIT))
+                os.getenv("CHARACTER_LIMIT", str(DEFAULT_CHARACTER_LIMIT))
             ),
-            max_file_size=int(
-                os.getenv("MAX_FILE_SIZE", str(self.DEFAULT_MAX_FILE_SIZE))
-            ),
-            default_timeout=int(os.getenv("TIMEOUT", str(self.DEFAULT_TIMEOUT))),
-            max_timeout=self.MAX_TIMEOUT,
+            max_file_size=int(os.getenv("MAX_FILE_SIZE", str(DEFAULT_MAX_FILE_SIZE))),
+            default_timeout=int(os.getenv("TIMEOUT", str(DEFAULT_TIMEOUT))),
+            max_timeout=MAX_TIMEOUT,
             strict_host_key_checking=os.getenv(
                 "SSH_STRICT_HOST_KEY_CHECKING", "true"
             ).lower()
@@ -100,7 +91,7 @@ class SSHConfig:
         # STEP 4: Validate remaining configuration (authentication, etc.)
         valid, error = self.validate()
         if not valid:
-            raise ConfigError(error)
+            raise ConfigError(error or "Configuration validation failed")
 
     def _load_host_config(self) -> HostConfig:
         """Load SSH host configuration from environment variables"""
@@ -110,7 +101,7 @@ class SSHConfig:
                 "No SSH host configuration found. Set HOST environment variable"
             )
 
-        port = int(os.getenv("SSH_PORT", str(self.DEFAULT_SSH_PORT)))
+        port = int(os.getenv("SSH_PORT", str(DEFAULT_SSH_PORT)))
         username = os.getenv("SSH_USERNAME", "root")
         key_path = os.getenv("SSH_KEY")
 

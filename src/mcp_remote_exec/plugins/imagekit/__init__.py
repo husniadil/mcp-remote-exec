@@ -62,6 +62,7 @@ class ImageKitPlugin(BasePlugin):
 
         # Register tools
         register_imagekit_tools(mcp, container)
+        _log.info("ImageKit tools registered (4 file transfer tools)")
 
 
 __all__ = ["ImageKitPlugin"]

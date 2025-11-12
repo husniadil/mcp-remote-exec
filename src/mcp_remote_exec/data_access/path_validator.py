@@ -5,6 +5,7 @@ Centralized path validation to prevent directory traversal and ensure file secur
 """
 
 import os
+import warnings
 
 from mcp_remote_exec.constants import MSG_PATH_TRAVERSAL_ERROR
 from mcp_remote_exec.data_access.exceptions import FileValidationError
@@ -67,7 +68,9 @@ class PathValidator:
         """
         Validate file path for security (prevent directory traversal).
 
-        This is the legacy interface maintained for backward compatibility.
+        .. deprecated:: 0.2.0
+            Use :meth:`validate_path` instead. This method is maintained for
+            backward compatibility but will be removed in a future version.
 
         Args:
             file_path: The file path to validate
@@ -77,6 +80,13 @@ class PathValidator:
         Raises:
             FileValidationError: If validation fails
         """
+        warnings.warn(
+            "PathValidator.validate_file_path() is deprecated and will be removed in a future version. "
+            "Use PathValidator.validate_path() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         path_type = "remote" if remote_operation else "local"
 
         # Always check for directory traversal

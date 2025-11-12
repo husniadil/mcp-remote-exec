@@ -83,7 +83,7 @@ class ImageKitRequestUploadInput(BaseModel):
         str_strip_whitespace=True, validate_assignment=True, extra="forbid"
     )
 
-    remote_path: str = Field(..., min_length=1)
+    remote_path: str = Field(..., min_length=1, max_length=4096)
     permissions: int | None = Field(None, ge=0, le=777)
     overwrite: bool = False
     ctid: int | None = Field(
@@ -117,7 +117,7 @@ class ImageKitRequestDownloadInput(BaseModel):
         str_strip_whitespace=True, validate_assignment=True, extra="forbid"
     )
 
-    remote_path: str = Field(..., min_length=1)
+    remote_path: str = Field(..., min_length=1, max_length=4096)
     ctid: int | None = Field(
         None, ge=100, le=999999999
     )  # Optional Proxmox container ID

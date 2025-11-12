@@ -61,14 +61,14 @@ class CommandService:
             )
 
             # Step 4: Add execution metadata
-            metadata = "\n\n=== EXECUTION METADATA ===\n"
-            metadata += (
-                f"Host: {host_config.name} ({host_config.host}:{host_config.port})\n"
-            )
-            metadata += f"User: {host_config.username}\n"
-            metadata += f"Timestamp: {datetime.now().isoformat()}"
+            metadata = [
+                "\n\n=== EXECUTION METADATA ===",
+                f"Host: {host_config.name} ({host_config.host}:{host_config.port})",
+                f"User: {host_config.username}",
+                f"Timestamp: {datetime.now().isoformat()}",
+            ]
 
-            formatted_result.content += metadata
+            formatted_result.content += "\n".join(metadata)
 
             return formatted_result.content
 

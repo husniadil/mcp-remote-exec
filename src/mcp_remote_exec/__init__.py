@@ -26,8 +26,13 @@ CLI Usage:
     mcp-remote-exec                    # stdio mode (Claude Desktop)
 """
 
-__version__ = "0.1.0"
-__author__ = "SSH MCP Remote Exec"
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("mcp-remote-exec")
+except PackageNotFoundError:
+    __version__ = "0.0.0.dev"
+
 __description__ = "SSH MCP Remote Exec for remote server management"
 
 # Package exports

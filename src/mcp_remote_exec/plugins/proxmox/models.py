@@ -129,7 +129,7 @@ class ProxmoxUploadFileInput(BaseModel):
         max_length=4096,
     )
     permissions: int | None = Field(
-        default=644,
+        None,
         description="File permissions as octal (e.g., 644, 755)",
         ge=0,
         le=777,

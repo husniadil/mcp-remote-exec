@@ -149,7 +149,10 @@ async def ssh_exec_command(
     try:
         # Validate command is not empty (required parameter)
         if not command or not command.strip():
-            return "[ERROR] Input validation error: 'command' parameter is required and cannot be empty"
+            services = get_services()
+            return services.output_formatter.format_error_result(
+                "Input validation error: 'command' parameter is required and cannot be empty"
+            ).content
 
         # Validate input using Pydantic model
         input_data = SSHExecCommandInput(
@@ -169,9 +172,15 @@ async def ssh_exec_command(
         return result
 
     except ValueError as e:
-        return f"[ERROR] Input validation error: {str(e)}"
+        services = get_services()
+        return services.output_formatter.format_error_result(
+            f"Input validation error: {str(e)}"
+        ).content
     except Exception as e:
-        return f"[ERROR] Unexpected error: {str(e)}"
+        services = get_services()
+        return services.output_formatter.format_error_result(
+            f"Unexpected error: {str(e)}"
+        ).content
 
 
 def _register_ssh_file_transfer_tools() -> None:
@@ -213,9 +222,15 @@ def _register_ssh_file_transfer_tools() -> None:
         try:
             # Validate required parameters are not empty
             if not local_path or not local_path.strip():
-                return "[ERROR] Input validation error: 'local_path' parameter is required and cannot be empty"
+                services = get_services()
+                return services.output_formatter.format_error_result(
+                    "Input validation error: 'local_path' parameter is required and cannot be empty"
+                ).content
             if not remote_path or not remote_path.strip():
-                return "[ERROR] Input validation error: 'remote_path' parameter is required and cannot be empty"
+                services = get_services()
+                return services.output_formatter.format_error_result(
+                    "Input validation error: 'remote_path' parameter is required and cannot be empty"
+                ).content
 
             # Validate input
             input_data = SSHUploadFileInput(
@@ -237,9 +252,15 @@ def _register_ssh_file_transfer_tools() -> None:
             return result
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            services = get_services()
+            return services.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            services = get_services()
+            return services.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content
 
     @mcp.tool(name="ssh_download_file")
     async def ssh_download_file(
@@ -273,9 +294,15 @@ def _register_ssh_file_transfer_tools() -> None:
         try:
             # Validate required parameters are not empty
             if not remote_path or not remote_path.strip():
-                return "[ERROR] Input validation error: 'remote_path' parameter is required and cannot be empty"
+                services = get_services()
+                return services.output_formatter.format_error_result(
+                    "Input validation error: 'remote_path' parameter is required and cannot be empty"
+                ).content
             if not local_path or not local_path.strip():
-                return "[ERROR] Input validation error: 'local_path' parameter is required and cannot be empty"
+                services = get_services()
+                return services.output_formatter.format_error_result(
+                    "Input validation error: 'local_path' parameter is required and cannot be empty"
+                ).content
 
             # Validate input
             input_data = SSHDownloadFileInput(
@@ -293,6 +320,12 @@ def _register_ssh_file_transfer_tools() -> None:
             return result
 
         except ValueError as e:
-            return f"[ERROR] Input validation error: {str(e)}"
+            services = get_services()
+            return services.output_formatter.format_error_result(
+                f"Input validation error: {str(e)}"
+            ).content
         except Exception as e:
-            return f"[ERROR] Unexpected error: {str(e)}"
+            services = get_services()
+            return services.output_formatter.format_error_result(
+                f"Unexpected error: {str(e)}"
+            ).content

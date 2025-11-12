@@ -30,8 +30,12 @@ class FileTransferResult:
     message: str  # Human-readable result or error message
     bytes_transferred: int = 0  # Total number of bytes transferred
     transfer_speed: float = 0.0  # Transfer speed in bytes per second
-    local_path: str | None = None  # Local file system path (source for upload, destination for download)
-    remote_path: str | None = None  # Remote server path (destination for upload, source for download)
+    local_path: str | None = (
+        None  # Local file system path (source for upload, destination for download)
+    )
+    remote_path: str | None = (
+        None  # Remote server path (destination for upload, source for download)
+    )
     operation: str = ""  # Type of operation: "upload" or "download"
 
 
@@ -74,10 +78,12 @@ class SFTPManager:
             remote_operation: True for remote paths, False for local paths
             check_existence: Whether to check if local file exists
         """
-        PathValidator.validate_file_path(
+        path_type = "remote" if remote_operation else "local"
+        PathValidator.validate_path(
             file_path,
-            remote_operation=remote_operation,
-            check_existence=check_existence,
+            check_traversal=True,
+            check_exists=(check_existence and not remote_operation),
+            path_type=path_type,
         )
 
     def _validate_file_size(self, file_path: str) -> int:
