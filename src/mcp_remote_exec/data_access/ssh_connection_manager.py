@@ -145,6 +145,8 @@ class SSHConnectionManager:
                     username=host_config.username,
                     password=host_config.password,
                     timeout=connection_timeout,
+                    allow_agent=False,
+                    look_for_keys=False,
                 )
                 auth_method = "password"
             else:
